@@ -219,3 +219,38 @@
 .timeline-preset-color:hover {
   transform: scale(1.2);
 }
+
+/* 新增：错误提示样式 */
+.timeline-error {
+  padding: 10px 15px;
+  margin: 10px 0;
+  border: 1px solid var(--text-error);
+  border-left-width: 5px;
+  border-radius: 5px;
+  background-color: var(--background-secondary);
+  color: var(--text-normal);
+}
+
+.timeline-error strong {
+  color: var(--text-error);
+}
+
+.timeline-error p {
+  margin: 8px 0;
+  font-size: 0.9em;
+}
+
+.timeline-error ul {
+  margin: 5px 0 0 20px;
+  padding-left: 0;
+  font-size: 0.9em;
+}
+
+.timeline-error li {
+  margin-bottom: 4px;
+}
+
+/* 新增：当时间轴容器内有错误提示时，隐藏竖线 */
+.timeline-container:has(.timeline-error)::before {
+  display: none;
+}

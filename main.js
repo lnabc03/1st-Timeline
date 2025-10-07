@@ -42,81 +42,75 @@ class TimelinePlugin extends Plugin {
       let currentEvent = null;
       let currentContent = [];
 
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i].trim();
+      const singleLineRegex = /^(.+?)(  |：|:)(.*)$/;
 
-        // 跳过空行，但如果已有事件正在处理，保留空行作为内容一部分
-        if (line === '' && !currentEvent) continue;
+      for (const line of lines) {
+        const trimmedLine = line.trim();
 
-        // 检查是否为新事件的开始行（包含日期格式）
+        // 跳过完全是空字符串的行
+        if (trimmedLine === '') {
+          // 如果正在处理一个事件，则空行被视作内容的一部分
+          if (currentEvent) {
+            currentContent.push(line);
+          }
+          continue;
+        }
+
         let dateMatch = false;
         let dateTimeStr = '';
         let contentStr = '';
 
-        if (line.includes('：')) {
-          const parts = line.split('：', 2);
-          if (parts.length === 2) {
-            dateTimeStr = parts[0].trim();
-            contentStr = parts[1].trim();
-            const parsedDateTime = this.parseDateTime(dateTimeStr);
-            if (parsedDateTime) {
-              dateMatch = true;
-            }
-          }
-        } else if (line.includes('  ')) {
-          const parts = line.split('  ', 2);
-          if (parts.length === 2) {
-            dateTimeStr = parts[0].trim();
-            contentStr = parts[1].trim();
-            const parsedDateTime = this.parseDateTime(dateTimeStr);
-            if (parsedDateTime) {
-              dateMatch = true;
-            }
-          }
-        } else {
-          // 尝试解析整行作为日期
-          const parsedDateTime = this.parseDateTime(line);
-          if (parsedDateTime) {
-            dateTimeStr = line;
-            contentStr = '';
+        // 尝试匹配单行事件格式 (日期 + 分隔符 + 内容)
+        const singleLineMatch = trimmedLine.match(singleLineRegex);
+
+        if (singleLineMatch) {
+          const potentialDate = singleLineMatch[1].trim();
+          if (this.parseDateTime(potentialDate)) {
+            dateTimeStr = potentialDate;
+            contentStr = singleLineMatch[3].trim();
             dateMatch = true;
           }
         }
 
-        // 如果找到新的日期行
+        // 如果单行匹配失败，尝试将整行作为日期（用于多行事件格式）
+        if (!dateMatch && this.parseDateTime(trimmedLine)) {
+          dateTimeStr = trimmedLine;
+          contentStr = '';
+          dateMatch = true;
+        }
+
+        // 如果是一个新的日期事件行
         if (dateMatch) {
-          // 如果已有正在处理的事件，先保存它
+          // 保存上一个事件
           if (currentEvent) {
-            // 合并多行内容
-            currentEvent.content = currentContent.join('\n');
-            events.push(currentEvent);
-            currentContent = [];
+            currentEvent.content = currentContent.join('\n').trim();
+            if (currentEvent.content || contentStr) { // 仅当有内容时添加
+              events.push(currentEvent);
+            }
           }
 
-          // 开始一个新事件
+          // 创建新事件
           const parsedDateTime = this.parseDateTime(dateTimeStr);
           currentEvent = {
             date: parsedDateTime.date,
             displayDate: parsedDateTime.display,
             originalDate: dateTimeStr,
-            content: contentStr
+            content: '' // 暂时为空，后续填充
           };
+          currentContent = contentStr ? [contentStr] : [];
 
-          // 如果日期行已经有内容，将其添加到当前内容
-          if (contentStr) {
-            currentContent.push(contentStr);
-          }
-        }
-        // 不是日期行，当前事件存在，添加为内容的一部分
-        else if (currentEvent) {
+        } else if (currentEvent) {
+          // 如果不是日期行，则将其作为当前事件的内容
           currentContent.push(line);
         }
       }
 
-      // 处理最后一个事件
+      // 添加最后一个事件
       if (currentEvent) {
-        currentEvent.content = currentContent.join('\n');
-        events.push(currentEvent);
+        currentEvent.content = currentContent.join('\n').trim();
+        if (currentEvent.content) {
+          events.push(currentEvent);
+        }
       }
 
       // 排序事件
@@ -131,10 +125,24 @@ class TimelinePlugin extends Plugin {
           style: `--timeline-color: ${this.settings.timelineColor}; --dot-size: ${this.settings.dotSize}px; --line-width: ${this.settings.lineWidth}px; --item-spacing: ${this.settings.itemSpacing}px;`
         }
       });
-      // 获取今天的日期（重置为0点以便比较日期）
+
+      // 如果源文本不为空但没有解析出任何事件，则显示错误提示
+      if (events.length === 0 && source.trim() !== '') {
+        const errorEl = timelineContainer.createEl('div', { cls: 'timeline-error' });
+        errorEl.createEl('strong', { text: '1st-Timeline 解析错误' });
+        errorEl.createEl('p', { text: '未能解析出任何有效事件。请检查您的语法是否符合以下格式之一：' });
+        const listEl = errorEl.createEl('ul');
+        listEl.createEl('li', { text: '日期：事件内容 (使用中文或英文冒号)' });
+        listEl.createEl('li', { text: '日期  事件内容 (使用两个空格)' });
+        listEl.createEl('li', { text: '日期 (后跟换行和多行内容)' });
+        return; // 停止渲染
+      }
+
+      // 获取今天的日期（重置为0点以便比较日期）(此部分不变)
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       for (const event of events) {
+        // ... 渲染部分的代码保持不变 ...
         const timelineItem = timelineContainer.createEl('div', { cls: 'timeline-item' });
         let displayDate = event.displayDate;
         let dateDisplay = '';
