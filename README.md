@@ -1,7 +1,7 @@
 # First Timeline
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **Current version**: 1.4.0
+> **Current version**: 1.4.1
 
 ## 📝 Description
 
