@@ -1,5 +1,3 @@
-/* eslint-disable obsidianmd/ui/sentence-case */
-
 import { MarkdownRenderer, type MarkdownPostProcessorContext } from 'obsidian';
 import type TimelinePlugin from './main';
 import { SINGLE_LINE_REGEX } from './constants';
@@ -13,8 +11,8 @@ interface TimelineEvent {
 }
 
 /**
- * 解析并渲染 timeline 代码块。
- * 由 main.ts 中的代码块处理器回调调用。
+ * Parses and renders a timeline code block.
+ * Called by the code block processor callback in main.ts.
  */
 export function processTimelineBlock(
 	source: string,
@@ -87,13 +85,13 @@ export function processTimelineBlock(
 		}
 	}
 
-	// 排序
+	// Sort events
 	events.sort((a, b) => {
 		const direction = plugin.settings.sortDirection === 'asc' ? 1 : -1;
 		return direction * (a.date.getTime() - b.date.getTime());
 	});
 
-	// 自动折叠
+	// Auto collapse
 	let collapsedIndices = new Set<number>();
 	let isCollapsed = false;
 	if (
@@ -117,7 +115,7 @@ export function processTimelineBlock(
 		isCollapsed = collapsedIndices.size < events.length;
 	}
 
-	// 容器
+	// Container
 	const timelineContainer = el.createEl('div', {
 		cls: 'timeline-container',
 		attr: {
@@ -125,29 +123,30 @@ export function processTimelineBlock(
 		},
 	});
 
-	// 空块 + 有内容 → 错误提示
+	// Empty block with content: show error
 	if (events.length === 0 && source.trim() !== '') {
+		timelineContainer.addClass('timeline-has-error');
 		const errorEl = timelineContainer.createEl('div', {
 			cls: 'timeline-error',
 		});
-		errorEl.createEl('strong', { text: '1st-Timeline 解析错误' });
+		errorEl.createEl('strong', { text: 'Timeline parse error' });
 		errorEl.createEl('p', {
-			text: '未能解析出任何有效事件。请检查您的语法是否符合以下格式之一：',
+			text: 'No valid events could be parsed. Check the syntax:',
 		});
 		const listEl = errorEl.createEl('ul');
 		listEl.createEl('li', {
-			text: '日期：事件内容 (使用中文或英文冒号)',
+			text: 'Date: content (colon separator)',
 		});
 		listEl.createEl('li', {
-			text: '日期  事件内容 (使用两个空格)',
+			text: 'Date  content (two spaces separator)',
 		});
 		listEl.createEl('li', {
-			text: '日期 (后跟换行和多行内容)',
+			text: 'Date (followed by newline and multi-line content)',
 		});
 		return;
 	}
 
-	// 渲染每个事件
+	// Render each event
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
@@ -159,7 +158,7 @@ export function processTimelineBlock(
 			timelineItem.addClass('timeline-collapsed-item');
 		}
 
-		// 日期显示格式化
+		// Format date display
 		let displayDate = event.displayDate;
 		let dateDisplay = '';
 		let timeDisplay = '';
@@ -202,18 +201,18 @@ export function processTimelineBlock(
 			contentEl.addClass('timeline-today');
 		}
 
-		// 悬停提示
+		// Hover tooltip
 		if (plugin.settings.showTooltip) {
 			const tooltipEl = contentEl.createEl('div', {
 				cls: 'timeline-tooltip',
 			});
 
 			if (daysDiff === 0) {
-				tooltipEl.setText('今天');
+				tooltipEl.setText('Today');
 			} else if (daysDiff > 0) {
-				tooltipEl.setText(`距今还有 ${daysDiff} 天`);
+				tooltipEl.setText(`${daysDiff} days from now`);
 			} else {
-				tooltipEl.setText(`已过去 ${Math.abs(daysDiff)} 天`);
+				tooltipEl.setText(`${Math.abs(daysDiff)} days ago`);
 			}
 
 			let hoverTimer: number | null = null;
@@ -233,8 +232,7 @@ export function processTimelineBlock(
 			});
 		}
 
-		// 渲染 Markdown 内容
-		// eslint-disable-next-line @typescript-eslint/no-deprecated
+		// Render Markdown content
 		void MarkdownRenderer.renderMarkdown(
 			event.content,
 			contentEl,
@@ -243,7 +241,7 @@ export function processTimelineBlock(
 		);
 	}
 
-	// 折叠/展开按钮
+	// Collapse/expand button
 	if (isCollapsed) {
 		timelineContainer.addClass('timeline-collapsed');
 		const hiddenCount = events.length - collapsedIndices.size;
@@ -256,18 +254,18 @@ export function processTimelineBlock(
 		const collapseBtn = collapseBar.createEl('button', {
 			cls: 'timeline-collapse-btn',
 		});
-		collapseBtn.setText(`展开全部 (+${hiddenCount})`);
+		collapseBtn.setText(`Show all (+${hiddenCount})`);
 
 		let expanded = false;
 		plugin.registerDomEvent(collapseBtn, 'click', () => {
 			expanded = !expanded;
 			if (expanded) {
 				timelineContainer.removeClass('timeline-collapsed');
-				collapseBtn.setText('收起');
+				collapseBtn.setText('Collapse');
 				collapseGradient.addClass('timeline-collapse-gradient-hidden');
 			} else {
 				timelineContainer.addClass('timeline-collapsed');
-				collapseBtn.setText(`展开全部 (+${hiddenCount})`);
+				collapseBtn.setText(`Show all (+${hiddenCount})`);
 				collapseGradient.removeClass(
 					'timeline-collapse-gradient-hidden'
 				);

@@ -28,7 +28,7 @@ export function parseDateTime(dateTimeStr: string): ParsedDateTime | null {
 		const [, dateStr, timeStr] = preciseMatch;
 		const [year, month, day] = dateStr!.split('-').map(Number);
 		const [hour, minute] = timeStr!.split(':').map(Number);
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- noUncheckedIndexedAccess requires non-null assertions on destructured array elements
 		date = new Date(year!, month! - 1, day!, hour!, minute!);
 		return { date, display: `${dateStr}_${timeStr}` };
 	}
@@ -53,7 +53,7 @@ export function parseDateTime(dateTimeStr: string): ParsedDateTime | null {
 	// 优先级 3: YYYY-MM-DD
 	if (ISO_DATE_REGEX.test(displayStr)) {
 		const [year, month, day] = displayStr.split('-').map(Number);
-		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
+		// eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion -- noUncheckedIndexedAccess requires non-null assertions on destructured array elements
 		date = new Date(year!, month! - 1, day!);
 		return { date, display: displayStr };
 	}

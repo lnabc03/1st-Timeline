@@ -31,4 +31,10 @@ export default tseslint.config(
 		},
 	},
 	...obsidianmd.configs.recommended,
+	{
+		rules: {
+			// Uses display() for backward compatibility with minAppVersion 1.0.0
+			'@typescript-eslint/no-deprecated': 'off',
+		},
+	},
 );

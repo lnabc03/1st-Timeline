@@ -18,7 +18,7 @@ export default class TimelinePlugin extends Plugin {
 
 		this.addCommand({
 			id: 'generate-notes-timeline',
-			name: '笔记汇总',
+			name: 'Notes summary',
 			callback: () => {
 				new DateRangeModal(this.app, this).open();
 			},

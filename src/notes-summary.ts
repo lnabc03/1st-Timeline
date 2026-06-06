@@ -1,5 +1,3 @@
-/* eslint-disable obsidianmd/ui/sentence-case */
-
 import {
 	type App,
 	MarkdownView,
@@ -12,8 +10,8 @@ import type TimelinePlugin from './main';
 import { DATE_RANGE_REGEX } from './constants';
 
 /**
- * 扫描 vault 中所有 Markdown 文件，按 frontmatter 日期字段汇总，
- * 生成 timeline 代码块内容。
+ * Scans all vault Markdown files and aggregates them by frontmatter date field,
+ * generating timeline code block content.
  */
 export async function generateNotesTimeline(
 	plugin: TimelinePlugin,
@@ -34,7 +32,6 @@ export async function generateNotesTimeline(
 					plugin.app.metadataCache.getFileCache(file)?.frontmatter;
 				if (metadata) {
 					const dateField = plugin.settings.createdDateField;
-					// 动态 frontmatter 属性需要类型断言
 					const dateValue = (metadata as Record<string, unknown>)[
 						dateField
 					];
@@ -66,7 +63,7 @@ export async function generateNotesTimeline(
 					}
 				}
 			} catch (err) {
-				console.error(`处理笔记 ${file.path} 时出错:`, err);
+				console.error(`Error processing note ${file.path}:`, err);
 			}
 		}
 
@@ -89,17 +86,17 @@ export async function generateNotesTimeline(
 		}
 
 		if (!timelineContent) {
-			return '所选日期范围内没有找到任何笔记。';
+			return 'No notes found in the selected date range.';
 		}
 
 		return timelineContent;
 	} catch (err) {
-		console.error('生成笔记汇总时出错:', err);
-		return `生成笔记汇总时出错: ${err instanceof Error ? err.message : String(err)}`;
+		console.error('Error generating notes summary:', err);
+		return `Error generating notes summary: ${err instanceof Error ? err.message : String(err)}`;
 	}
 }
 
-/** 日期范围选择弹窗 */
+/** Date range selection modal */
 export class DateRangeModal extends Modal {
 	plugin: TimelinePlugin;
 
@@ -110,15 +107,15 @@ export class DateRangeModal extends Modal {
 
 	onOpen(): void {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: '笔记汇总' });
+		contentEl.createEl('h2', { text: 'Notes summary' });
 
 		const paragraph = contentEl.createEl('p');
 		paragraph.appendText(
-			'请输入日期范围（YYYY-MM-DD,YYYY-MM-DD）'
+			'Enter a date range (YYYY-MM-DD,YYYY-MM-DD)'
 		);
 		paragraph.appendChild(activeDocument.createElement('br'));
 		paragraph.appendText(
-			`1st-Timeline将基于时间属性"${this.plugin.settings.createdDateField}"汇总笔记`
+			`Timeline will summarize notes by the property "${this.plugin.settings.createdDateField}"`
 		);
 
 		const inputContainer = contentEl.createDiv();
@@ -148,14 +145,14 @@ export class DateRangeModal extends Modal {
 		buttonContainer.addClass('timeline-modal-buttons');
 
 		const cancelButton = buttonContainer.createEl('button', {
-			text: '取消',
+			text: 'Cancel',
 		});
 		this.plugin.registerDomEvent(cancelButton, 'click', () => {
 			this.close();
 		});
 
 		const confirmButton = buttonContainer.createEl('button', {
-			text: '确认',
+			text: 'Confirm',
 			cls: 'mod-cta',
 		});
 		confirmButton.addClass('timeline-modal-confirm');
@@ -164,7 +161,7 @@ export class DateRangeModal extends Modal {
 			const dateRange = dateRangeInput.getValue().split(',');
 			if (dateRange.length !== 2) {
 				new Notice(
-					'请输入有效的日期范围，格式：YYYY-MM-DD,YYYY-MM-DD'
+					'Invalid date range. Use the format yyyy-mm-dd,yyyy-mm-dd'
 				);
 				return;
 			}
@@ -173,7 +170,7 @@ export class DateRangeModal extends Modal {
 				!DATE_RANGE_REGEX.test(startDate!) ||
 				!DATE_RANGE_REGEX.test(endDate!)
 			) {
-				new Notice('日期格式无效，请使用 YYYY-MM-DD 格式');
+				new Notice('Invalid date format. Use yyyy-mm-dd');
 				return;
 			}
 
@@ -191,9 +188,9 @@ export class DateRangeModal extends Modal {
 					`\`\`\`timeline\n${timelineContent}\`\`\`\n`,
 					cursor
 				);
-				new Notice('笔记汇总时间轴已生成');
+				new Notice('Notes timeline generated');
 			} else {
-				new Notice('无法插入时间轴，请确保有打开的编辑器');
+				new Notice('Unable to insert timeline. Make sure an editor is open.');
 			}
 			this.close();
 		});

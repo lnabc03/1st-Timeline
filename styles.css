@@ -150,13 +150,13 @@
 }
 
 /* --- 当天事件特殊样式 --- */
-.timeline-today {
-  border-left: 3px solid var(--text-accent) !important;
+.timeline-content.timeline-today {
+  border-left: 3px solid var(--text-accent);
   background: color-mix(in srgb, var(--text-accent) 6%, var(--background-secondary));
 }
 
-.timeline-today::before {
-  border-right-color: color-mix(in srgb, var(--text-accent) 6%, var(--background-secondary)) !important;
+.timeline-content.timeline-today::before {
+  border-right-color: color-mix(in srgb, var(--text-accent) 6%, var(--background-secondary));
 }
 
 /* --- 悬停提示 --- */
@@ -350,8 +350,8 @@
   margin-bottom: 4px;
 }
 
-/* 当时间轴容器内有错误提示时，隐藏竖线 */
-.timeline-container:has(.timeline-error)::before {
+/* Hide vertical line when there is an error in the container */
+.timeline-container.timeline-has-error::before {
   display: none;
 }
 

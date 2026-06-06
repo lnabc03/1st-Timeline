@@ -2,8 +2,6 @@ import { type App, Notice, PluginSettingTab, Setting, TextComponent } from 'obsi
 import type TimelinePlugin from './main';
 import { COLOR_PRESETS } from './constants';
 
-/* eslint-disable obsidianmd/ui/sentence-case */
-
 export interface TimelinePluginSettings {
 	sortDirection: 'asc' | 'desc';
 	timelineColor: string;
@@ -42,22 +40,21 @@ export class TimelineSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	/* eslint-disable @typescript-eslint/no-deprecated */
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
 
 		new Setting(containerEl)
-			.setName('1st-Timeline 设置')
+			.setName('First timeline')
 			.setHeading();
 
 		new Setting(containerEl)
-			.setName('排序方向')
-			.setDesc('选择时间轴事件的排序方向')
+			.setName('Sort direction')
+			.setDesc('Sort order for timeline events')
 			.addDropdown((dropdown) =>
 				dropdown
-					.addOption('asc', '升序 (从早到晚)')
-					.addOption('desc', '降序 (从晚到早)')
+					.addOption('asc', 'Ascending (earliest first)')
+					.addOption('desc', 'Descending (latest first)')
 					.setValue(this.plugin.settings.sortDirection)
 					.onChange(async (value: string) => {
 						this.plugin.settings.sortDirection = value as 'asc' | 'desc';
@@ -66,8 +63,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 			);
 
 		new Setting(containerEl)
-			.setName('用于笔记汇总的属性')
-			.setDesc('该属性需包含"YYYY-MM-DD"格式的日期信息')
+			.setName('Date property for notes summary')
+			.setDesc('Frontmatter property containing a date (yyyy-mm-dd)')
 			.addText((text) =>
 				text
 					.setValue(this.plugin.settings.createdDateField)
@@ -77,18 +74,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('恢复默认').onClick(async () => {
+				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.createdDateField = 'created';
 					await this.plugin.saveSettings();
 					this.display();
-					new Notice('已恢复默认属性名称');
+					new Notice('Default property name restored');
 				})
 			);
 
-		// 颜色设置（含预设按钮）
+		// Color settings with preset buttons
 		const colorSetting = new Setting(containerEl)
-			.setName('时间轴颜色')
-			.setDesc('设置时间轴和时间点的颜色');
+			.setName('Timeline color')
+			.setDesc('Color of the timeline line and dots');
 
 		const colorSettingControl = colorSetting.controlEl.createEl('div', {
 			cls: 'timeline-color-setting-container',
@@ -133,14 +130,14 @@ export class TimelineSettingTab extends PluginSettingTab {
 				await this.plugin.saveSettings();
 				(colorInput.components[0] as TextComponent)?.setValue(preset.value);
 				colorPreview.style.backgroundColor = preset.value;
-				new Notice(`已设置为${preset.name}主题`);
+				new Notice(`Set to ${preset.name} theme`);
 			});
 		}
 
-		// 悬停提示框
+		// Hover tooltip
 		new Setting(containerEl)
-			.setName('悬停提示框')
-			.setDesc('启用后，鼠标悬停在事件上将显示距今天数')
+			.setName('Hover tooltip')
+			.setDesc('Show days until or since on hover')
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.showTooltip)
@@ -150,10 +147,10 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// 悬停延迟
+		// Hover delay
 		new Setting(containerEl)
-			.setName('悬停延迟')
-			.setDesc('设置悬停提示框出现前的延迟时间(毫秒)')
+			.setName('Hover delay')
+			.setDesc('Delay before the tooltip appears (milliseconds)')
 			.addSlider((slider) =>
 				slider
 					.setLimits(0, 1000, 100)
@@ -165,18 +162,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('恢复默认').onClick(async () => {
+				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.tooltipDelay = 500;
 					await this.plugin.saveSettings();
 					this.display();
-					new Notice('已恢复默认悬停延迟');
+					new Notice('Default hover delay restored');
 				})
 			);
 
-		// 当天事件高亮
+		// Highlight today
 		new Setting(containerEl)
-			.setName('当天事件高亮')
-			.setDesc('启用后，将特殊标记当天的事件')
+			.setName('Highlight today')
+			.setDesc('Highlight events on the current day')
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.highlightToday)
@@ -186,10 +183,10 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// 时间点大小
+		// Dot size
 		new Setting(containerEl)
-			.setName('时间点大小')
-			.setDesc('设置时间轴上点的大小')
+			.setName('Dot size')
+			.setDesc('Size of timeline dots')
 			.addSlider((slider) =>
 				slider
 					.setLimits(6, 20, 2)
@@ -201,18 +198,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('恢复默认').onClick(async () => {
+				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.dotSize = 12;
 					await this.plugin.saveSettings();
 					this.display();
-					new Notice('已恢复默认时间点大小');
+					new Notice('Default dot size restored');
 				})
 			);
 
-		// 线条宽度
+		// Line width
 		new Setting(containerEl)
-			.setName('线条宽度')
-			.setDesc('设置时间轴线条的宽度')
+			.setName('Line width')
+			.setDesc('Width of the timeline line')
 			.addSlider((slider) =>
 				slider
 					.setLimits(1, 5, 1)
@@ -224,18 +221,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('恢复默认').onClick(async () => {
+				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.lineWidth = 2;
 					await this.plugin.saveSettings();
 					this.display();
-					new Notice('已恢复默认线条宽度');
+					new Notice('Default line width restored');
 				})
 			);
 
-		// 事件间距
+		// Event spacing
 		new Setting(containerEl)
-			.setName('事件间距')
-			.setDesc('设置时间轴事件之间的间距')
+			.setName('Event spacing')
+			.setDesc('Spacing between timeline events')
 			.addSlider((slider) =>
 				slider
 					.setLimits(10, 40, 5)
@@ -247,19 +244,19 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('恢复默认').onClick(async () => {
+				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.itemSpacing = 20;
 					await this.plugin.saveSettings();
 					this.display();
-					new Notice('已恢复默认事件间距');
+					new Notice('Default event spacing restored');
 				})
 			);
 
-		// 自动折叠
+		// Auto collapse
 		new Setting(containerEl)
-			.setName('自动折叠')
+			.setName('Auto collapse')
 			.setDesc(
-				'启用后，当事件数量超过阈值时自动折叠时间轴，仅显示距今天最近的事件'
+				'Auto-collapse timeline when events exceed threshold, showing only events closest to today'
 			)
 			.addToggle((toggle) =>
 				toggle
@@ -270,10 +267,10 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			);
 
-		// 折叠阈值
+		// Collapse threshold
 		new Setting(containerEl)
-			.setName('折叠阈值')
-			.setDesc('事件数量达到此值时触发自动折叠')
+			.setName('Collapse threshold')
+			.setDesc('Number of events that triggers auto-collapse')
 			.addSlider((slider) =>
 				slider
 					.setLimits(5, 50, 5)
@@ -285,18 +282,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('恢复默认').onClick(async () => {
+				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.collapseThreshold = 10;
 					await this.plugin.saveSettings();
 					this.display();
-					new Notice('已恢复默认折叠阈值');
+					new Notice('Default collapse threshold restored');
 				})
 			);
 
-		// 折叠时显示数量
+		// Show count when collapsed
 		new Setting(containerEl)
-			.setName('折叠时显示数量')
-			.setDesc('折叠后显示距今天最近的事件数量')
+			.setName('Show when collapsed')
+			.setDesc('Number of events to show when collapsed')
 			.addSlider((slider) =>
 				slider
 					.setLimits(1, 15, 1)
@@ -308,13 +305,12 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			)
 			.addButton((button) =>
-				button.setButtonText('恢复默认').onClick(async () => {
+				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.collapseShowCount = 5;
 					await this.plugin.saveSettings();
 					this.display();
-					new Notice('已恢复默认折叠显示数量');
+					new Notice('Default show count restored');
 				})
 			);
-	/* eslint-enable @typescript-eslint/no-deprecated */
 	}
 }

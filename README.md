@@ -1,10 +1,13 @@
-> [!NOTE] 1st-Timeline
-> *一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。*
-> **当前版本**: 1.4.0
+# First Timeline
 
-## 📝 简介
+> A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
+> **Current version**: 1.4.0
 
-1st-Timeline 插件能够将简单的文本转换为精美的时间轴视图，支持多种日期格式，尤其对中文日期格式提供了良好支持。通过智能的日期解析和优雅的视觉呈现，帮助你轻松创建时间线、项目进度或历史事件记录。
+## 📝 Description
+
+First Timeline is an Obsidian plugin that renders beautiful timeline views from simple text. It supports multiple date formats with first-class Chinese date format support, intelligent date parsing, and elegant visual presentation — helping you create timelines, project progress views, or historical event records effortlessly.
+
+> 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。支持多种日期格式（含中文日期），智能日期解析，精美视觉呈现。
 
 ---
 
