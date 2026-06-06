@@ -1,9 +1,9 @@
 {
   "id": "first-timeline",
   "name": "1st Timeline",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "minAppVersion": "1.0.0",
-  "description": "一个简单、优雅、中文友好的时间轴渲染插件.",
+  "description": "A simple, elegant, Chinese-friendly timeline rendering plugin. 一个简单、优雅、中文友好的时间轴渲染插件.",
   "author": "lnabc03",
   "authorUrl": "https://github.com/lnabc03",
   "isDesktopOnly": false

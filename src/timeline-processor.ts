@@ -1,4 +1,4 @@
-import { MarkdownRenderer, type MarkdownPostProcessorContext } from 'obsidian';
+import { Component, MarkdownRenderer, type MarkdownPostProcessorContext } from 'obsidian';
 import type TimelinePlugin from './main';
 import { SINGLE_LINE_REGEX } from './constants';
 import { parseDateTime } from './date-parser';
@@ -146,6 +146,10 @@ export function processTimelineBlock(
 		return;
 	}
 
+	// Create a child component for markdown lifecycle management
+	const renderComponent = new Component();
+	plugin.addChild(renderComponent);
+
 	// Render each event
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
@@ -233,11 +237,12 @@ export function processTimelineBlock(
 		}
 
 		// Render Markdown content
-		void MarkdownRenderer.renderMarkdown(
+		void MarkdownRenderer.render(
+			plugin.app,
 			event.content,
 			contentEl,
 			ctx.sourcePath,
-			plugin
+			renderComponent
 		);
 	}
 

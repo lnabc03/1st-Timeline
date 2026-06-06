@@ -1,19 +1,270 @@
-# First Timeline
+# 1st Timeline
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **Current version**: 1.4.1
-
-## 📝 Description
-
-First Timeline is an Obsidian plugin that renders beautiful timeline views from simple text. It supports multiple date formats with first-class Chinese date format support, intelligent date parsing, and elegant visual presentation — helping you create timelines, project progress views, or historical event records effortlessly.
-
-> 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。支持多种日期格式（含中文日期），智能日期解析，精美视觉呈现。
+> **Current version**: 1.4.2
 
 ---
 
-## 📦 安装
+## Description
 
-### 从 Obsidian 社区插件市场（推荐）
+1st Timeline is an Obsidian plugin that renders beautiful timeline views from simple text code blocks. It supports multiple date formats with first-class Chinese date format support, intelligent date parsing, and elegant visual presentation — helping you create timelines, project progress views, or historical event records effortlessly.
+
+## Installation
+
+### From Obsidian Community Plugin Marketplace (Recommended)
+
+1. Open Obsidian **Settings → Community plugins**
+2. Disable **Safe mode**
+3. Click **Browse**, search for **"1st Timeline"**
+4. Install and enable
+
+### From GitHub Releases
+
+1. Go to the [Releases page](https://github.com/lnabc03/1st-Timeline/releases)
+2. Download the latest `main.js`, `manifest.json`, and `styles.css`
+3. Create the directory `.obsidian/plugins/first-timeline/` in your vault
+4. Copy the three files into that directory
+5. Restart Obsidian and enable the plugin in **Settings → Community plugins**
+
+### From Source
+
+```bash
+git clone https://github.com/lnabc03/1st-Timeline.git
+cd 1st-Timeline
+npm install
+npm run build
+```
+
+Then copy `main.js`, `manifest.json`, and `styles.css` to `.obsidian/plugins/first-timeline/`, restart Obsidian, and enable the plugin.
+
+> **Note**: The target directory name must match the `id` field in `manifest.json` (`first-timeline`).
+
+---
+
+## Features
+
+- **Simple syntax**: Separate dates and event content with colons (`:` / `：`) or two spaces
+- **Multiple date formats**:
+  - `YYYY-MM-DD` (ISO standard)
+  - `YYYY-MM-DD_HH:MM` (with precise time)
+  - `YYYY年MM月DD日` (Chinese date format)
+  - `YYYY年MM月DD日[time word]` (Chinese date with time-of-day: 早上/上午/中午/下午/晚上)
+- **Multi-line events**: Add multi-line content to a single event with full Obsidian Markdown support
+- **Notes summary**: Generate a timeline of notes based on a configurable frontmatter date property
+- **Auto collapse**: When the event count exceeds a threshold, only show events closest to today
+- **Smart interactions**:
+  - Hover tooltip showing days until or since an event (configurable delay)
+  - Automatic highlighting of today's events
+  - Card lift animation on hover
+- **Rich customization**:
+  - Multiple color presets (Blue / Green / Purple / Red / Orange) or custom colors
+  - Adjustable dot size, line width, and event spacing
+  - Toggle hover tooltips and set delay time
+  - Ascending / descending sort order
+- **Full Markdown support**: Event content supports wikilinks, external links, tables, callouts, blockquotes, and all Obsidian Markdown syntax
+- **Responsive design**: Adapts to desktop and mobile screen sizes
+- **Dark theme support**: Automatically adapts to light and dark themes
+
+---
+
+## Usage
+
+### Basic Timeline
+
+Insert a `timeline` code block in any Obsidian note:
+
+````markdown
+```timeline
+2024-01-01  New Year's Day (two spaces)
+2024-03-08: International Women's Day (colon)
+2024年5月1日：Labor Day (Chinese date + colon)
+2025-01-28_12:04  Precise time format
+2025年1月29日早上  Chinese date with time-of-day word
+2026-01-01
+A new year begins! (multi-line text)
+- Full Markdown syntax supported
+# Headings
+> Blockquotes
+> [!NOTE] Callouts
+| A | B |
+|---|---|
+| C | D |
+```
+````
+
+### Syntax Rules
+
+| Format | Separator | Example |
+|--------|-----------|---------|
+| Two spaces | `␣␣` | `2024-01-01  Event content` |
+| Chinese colon | `：` | `2024年3月8日：Event content` |
+| English colon | `:` | `2024-05-01: Event content` |
+| Date only (multi-line) | Newline | Date on one line, content on following lines |
+
+### Notes Summary
+
+Use the command palette (`Ctrl+P`) and run the **"Notes summary"** command:
+
+1. Enter a date range (format: `YYYY-MM-DD,YYYY-MM-DD`)
+2. The current month is pre-filled by default
+3. Confirm to insert a timeline of notes based on the configured frontmatter date field
+
+---
+
+## Settings
+
+| Setting | Description | Default | Range |
+|---------|-------------|---------|-------|
+| Sort direction | Event sort order | Ascending | Ascending / Descending |
+| Date property for notes summary | Frontmatter field name | `created` | Any field name |
+| Timeline color | Color of timeline line and dots | `#5588cc` | CSS color value |
+| Color presets | One-click theme switching | — | Blue / Green / Purple / Red / Orange |
+| Dot size | Size of timeline dots | 12px | 6–20px |
+| Line width | Width of the timeline line | 2px | 1–5px |
+| Event spacing | Spacing between event cards | 20px | 10–40px |
+| Hover tooltip | Show days-until/since tooltip | On | Toggle |
+| Hover delay | Delay before tooltip appears | 500ms | 0–1000ms |
+| Highlight today | Special highlight for today's events | On | Toggle |
+| Auto collapse | Auto-collapse when above threshold | On | Toggle |
+| Collapse threshold | Events needed to trigger collapse | 10 | 5–50 |
+| Show when collapsed | Events shown when collapsed | 5 | 1–15 |
+
+---
+
+## Tips
+
+- **Hover interaction**: Hover over event cards to see how many days until or since that event
+- **Today marker**: Today's events are automatically highlighted with a special left border
+- **Date display**: Chinese dates are auto-formatted to `YYYY-MM-DD` in the display while preserving time descriptions
+- **Layout**: Dates and times are displayed on separate lines for a clean card layout
+- **Theme switching**: Use the color presets to quickly change the timeline color theme
+- **Notes summary**: Defaults to the current month; pair with `created` or any custom frontmatter field
+
+---
+
+## Development
+
+This plugin follows [Obsidian's official sample plugin](https://github.com/obsidianmd/obsidian-sample-plugin) best practices:
+
+```bash
+npm install          # Install dependencies
+npm run dev          # Development mode (watch)
+npm run build        # Production build (tsc + esbuild)
+npm run lint         # ESLint check
+```
+
+- **Language**: TypeScript (strict mode)
+- **Build**: esbuild (CJS output, ES2021 target)
+- **Linting**: ESLint 9 + typescript-eslint + eslint-plugin-obsidianmd
+- **CI/CD**: GitHub Actions (lint + release)
+
+---
+
+## Compatibility
+
+- Minimum Obsidian version: **1.0.0**
+- Supports desktop and mobile devices
+- Light and dark theme compatible
+
+---
+
+## Changelog
+
+### 1.4.2
+
+- Fixed deprecated `display()` calls in settings — replaced with direct component updates
+- Fixed deprecated `MarkdownRenderer.renderMarkdown` — switched to `MarkdownRenderer.render`
+- Fixed README title to match manifest.json plugin name
+- Added bilingual English/Chinese README
+
+### 1.4.1
+
+- Fixed community plugin review issues (eslint-disable descriptions, sentence-case UI, CSS specificity, README English)
+
+### 1.4.0
+
+- **Refactor**: Fully aligned with Obsidian official sample plugin best practices
+  - JavaScript → TypeScript (strict mode)
+  - Single file → multi-module architecture (constants / date-parser / settings / timeline-processor / notes-summary)
+  - Added esbuild build system
+  - Added ESLint + eslint-plugin-obsidianmd
+  - Added GitHub Actions CI/CD (lint + release)
+- **Security**: All DOM events now use `registerDomEvent()` for automatic cleanup on plugin unload
+- **Fix**: Dynamic CSS injection → static stylesheet
+- **Fix**: `tooltipDelay` default value inconsistency (unified to 500ms)
+- **Optimization**: Removed redundant runtime settings guards (guaranteed by `Object.assign`)
+- **Optimization**: `activeLeaf` → `getActiveViewOfType` (eliminates deprecated API warning)
+
+### 1.3.3
+
+- Added auto-collapse: timeline collapses when events exceed threshold, showing only events closest to today
+- Added collapse settings: auto-collapse toggle, threshold, show count
+- Improved timeline visual design: modern card shadows, smooth transitions, refined hover effects
+
+### 1.3.2
+
+- Fixed precise time parsing issues
+
+### 1.3.1
+
+- Fixed date parsing issues
+
+### 1.3.0
+
+- Added multi-line event content support
+- Added notes summary feature — generate a timeline from note creation dates
+- Added date property setting for custom frontmatter fields
+
+### 1.2.0
+
+- Added hover tooltip showing days until/since events
+- Added today-highlight feature
+- Improved timeline visual styling
+
+### 1.1.0
+
+- Added Chinese date format support
+- Added multiple color preset themes
+- Improved responsive design
+
+### 1.0.0
+
+- Initial release
+
+---
+
+## Contributing
+
+Issue reports and feature suggestions are welcome!
+
+---
+
+## License
+
+**MIT License**
+
+---
+
+## Author
+
+[lnabc03](https://github.com/lnabc03) | 弋鹓
+
+---
+
+---
+
+# 第一时间轴 (1st Timeline)
+
+> 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
+> **当前版本**: 1.4.2
+
+## 简介
+
+1st Timeline 是一个 Obsidian 插件，可以将简单的文本代码块渲染为精美的时间轴视图。支持多种日期格式（含中文日期优先支持），智能日期解析，优雅的视觉呈现——帮助您轻松创建时间线、项目进度视图或历史事件记录。
+
+## 安装
+
+### 从 Obsidian 社区插件市场安装（推荐）
 
 1. 打开 Obsidian **设置 → 社区插件**
 2. 关闭"安全模式"
@@ -43,13 +294,13 @@ npm run build
 
 ---
 
-## ✨ 功能特点
+## 功能特点
 
 - **简洁的语法**: 使用中英文冒号或两个空格分隔日期和事件内容
 - **多种日期格式支持**:
-  - `YYYY-MM-DD`
+  - `YYYY-MM-DD`（ISO 标准格式）
   - `YYYY-MM-DD_HH:MM`（精确到分钟）
-  - `YYYY年MM月DD日`
+  - `YYYY年MM月DD日`（中文日期格式）
   - `YYYY年MM月DD日[时间词]`（支持"早上"、"上午"、"中午"、"下午"、"晚上"）
 - **多行事件内容**: 支持为单个事件添加多行内容，完整支持 Obsidian Markdown 语法
 - **笔记汇总功能**: 一键生成基于指定 frontmatter 日期属性的笔记时间轴
@@ -69,7 +320,7 @@ npm run build
 
 ---
 
-## 🚀 使用方法
+## 使用方法
 
 ### 基本时间轴
 
@@ -105,14 +356,15 @@ npm run build
 
 ### 笔记汇总
 
-使用命令面板（`Ctrl+P`）执行 **"笔记汇总"** 命令：
+使用命令面板（`Ctrl+P`）执行 **"Notes summary"** 命令：
+
 1. 输入日期范围（格式：`YYYY-MM-DD,YYYY-MM-DD`）
 2. 默认填充当前月份
 3. 确认后自动生成基于指定 frontmatter 属性的笔记时间轴
 
 ---
 
-## ⚙️ 设置选项
+## 设置选项
 
 | 设置项 | 说明 | 默认值 | 范围 |
 |--------|------|--------|------|
@@ -132,7 +384,7 @@ npm run build
 
 ---
 
-## 💡 小贴士
+## 小贴士
 
 - **互动体验**: 将鼠标悬停在事件卡片上，会显示该事件距离今天的天数
 - **当天标记**: 当天的事件会自动高亮显示，左侧有特殊边框
@@ -143,7 +395,7 @@ npm run build
 
 ---
 
-## 🛠 开发
+## 开发
 
 本插件已对齐 [Obsidian 官方示例插件](https://github.com/obsidianmd/obsidian-sample-plugin) 的最佳实践：
 
@@ -161,17 +413,29 @@ npm run lint         # ESLint 代码检查
 
 ---
 
-## 🔄 兼容性
+## 兼容性
 
-- 最低 Obsidian 版本: **0.15.0**
+- 最低 Obsidian 版本: **1.0.0**
 - 支持桌面和移动设备
 - 适配明亮和暗黑主题
 
 ---
 
-## 📋 更新日志
+## 更新日志
+
+### 1.4.2
+
+- 修复弃用的 `display()` 调用 — 改为直接更新组件
+- 修复弃用的 `MarkdownRenderer.renderMarkdown` — 切换为 `MarkdownRenderer.render`
+- 修复 README 标题与 manifest.json 插件名称不一致的问题
+- 新增中英双语 README
+
+### 1.4.1
+
+- 修复社区插件审核问题（eslint-disable 描述、sentence-case UI、CSS 优先级、README 英文内容）
 
 ### 1.4.0
+
 - **重构**: 完全对齐 Obsidian 官方示例插件最佳实践
   - JavaScript → TypeScript（strict 模式）
   - 单文件 → 多模块架构（constants / date-parser / settings / timeline-processor / notes-summary）
@@ -185,48 +449,55 @@ npm run lint         # ESLint 代码检查
 - **优化**: `activeLeaf` → `getActiveViewOfType`（消除废弃 API 警告）
 
 ### 1.3.3
+
 - 新增自动折叠功能：事件数量超过阈值时自动折叠，仅显示距今天最近的事件
 - 新增折叠相关设置项：自动折叠开关、折叠阈值、折叠显示数量
 - 优化时间轴视觉设计：更现代的卡片阴影、流畅的过渡动画、改进的悬停效果
 
 ### 1.3.2
+
 - 修复了精确时间解析的相关问题
 
 ### 1.3.1
+
 - 修复了日期解析相关的已知问题
 
 ### 1.3.0
+
 - 新增多行事件内容支持，提供更灵活的排版
 - 新增笔记汇总功能，一键生成基于创建日期的笔记时间轴
 - 新增笔记创建日期属性设置，支持自定义 frontmatter 字段
 
 ### 1.2.0
+
 - 添加悬停提示功能，显示事件距今天数
 - 添加当天事件高亮功能
 - 优化时间轴视觉效果
 
 ### 1.1.0
+
 - 增加中文日期格式支持
 - 添加多种颜色预设主题
 - 改进响应式设计
 
 ### 1.0.0
+
 - 初始版本发布
 
 ---
 
-## 🤝 贡献
+## 贡献
 
 欢迎提交问题报告和功能建议！
 
 ---
 
-## 📄 许可证
+## 许可证
 
 **MIT License**
 
 ---
 
-## 🫠 作者
+## 作者
 
 [lnabc03](https://github.com/lnabc03) | 弋鹓

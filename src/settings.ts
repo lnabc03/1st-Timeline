@@ -1,4 +1,4 @@
-import { type App, Notice, PluginSettingTab, Setting, TextComponent } from 'obsidian';
+import { type App, Notice, PluginSettingTab, Setting, type SliderComponent, TextComponent } from 'obsidian';
 import type TimelinePlugin from './main';
 import { COLOR_PRESETS } from './constants';
 
@@ -62,22 +62,25 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			);
 
+		let createdDateFieldComponent: TextComponent;
+
 		new Setting(containerEl)
 			.setName('Date property for notes summary')
 			.setDesc('Frontmatter property containing a date (yyyy-mm-dd)')
-			.addText((text) =>
-				text
+			.addText((text) => {
+				createdDateFieldComponent = text;
+				return text
 					.setValue(this.plugin.settings.createdDateField)
 					.onChange(async (value: string) => {
 						this.plugin.settings.createdDateField = value;
 						await this.plugin.saveSettings();
-					})
-			)
+					});
+			})
 			.addButton((button) =>
 				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.createdDateField = 'created';
 					await this.plugin.saveSettings();
-					this.display();
+					createdDateFieldComponent.setValue('created');
 					new Notice('Default property name restored');
 				})
 			);
@@ -148,24 +151,27 @@ export class TimelineSettingTab extends PluginSettingTab {
 			);
 
 		// Hover delay
+		let tooltipDelaySlider: SliderComponent;
+
 		new Setting(containerEl)
 			.setName('Hover delay')
 			.setDesc('Delay before the tooltip appears (milliseconds)')
-			.addSlider((slider) =>
-				slider
+			.addSlider((slider) => {
+				tooltipDelaySlider = slider;
+				return slider
 					.setLimits(0, 1000, 100)
 					.setValue(this.plugin.settings.tooltipDelay)
 					.setDynamicTooltip()
 					.onChange(async (value: number) => {
 						this.plugin.settings.tooltipDelay = value;
 						await this.plugin.saveSettings();
-					})
-			)
+					});
+			})
 			.addButton((button) =>
 				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.tooltipDelay = 500;
 					await this.plugin.saveSettings();
-					this.display();
+					tooltipDelaySlider.setValue(500);
 					new Notice('Default hover delay restored');
 				})
 			);
@@ -184,70 +190,79 @@ export class TimelineSettingTab extends PluginSettingTab {
 			);
 
 		// Dot size
+		let dotSizeSlider: SliderComponent;
+
 		new Setting(containerEl)
 			.setName('Dot size')
 			.setDesc('Size of timeline dots')
-			.addSlider((slider) =>
-				slider
+			.addSlider((slider) => {
+				dotSizeSlider = slider;
+				return slider
 					.setLimits(6, 20, 2)
 					.setValue(this.plugin.settings.dotSize)
 					.setDynamicTooltip()
 					.onChange(async (value: number) => {
 						this.plugin.settings.dotSize = value;
 						await this.plugin.saveSettings();
-					})
-			)
+					});
+			})
 			.addButton((button) =>
 				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.dotSize = 12;
 					await this.plugin.saveSettings();
-					this.display();
+					dotSizeSlider.setValue(12);
 					new Notice('Default dot size restored');
 				})
 			);
 
 		// Line width
+		let lineWidthSlider: SliderComponent;
+
 		new Setting(containerEl)
 			.setName('Line width')
 			.setDesc('Width of the timeline line')
-			.addSlider((slider) =>
-				slider
+			.addSlider((slider) => {
+				lineWidthSlider = slider;
+				return slider
 					.setLimits(1, 5, 1)
 					.setValue(this.plugin.settings.lineWidth)
 					.setDynamicTooltip()
 					.onChange(async (value: number) => {
 						this.plugin.settings.lineWidth = value;
 						await this.plugin.saveSettings();
-					})
-			)
+					});
+			})
 			.addButton((button) =>
 				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.lineWidth = 2;
 					await this.plugin.saveSettings();
-					this.display();
+					lineWidthSlider.setValue(2);
 					new Notice('Default line width restored');
 				})
 			);
 
 		// Event spacing
+		let itemSpacingSlider: SliderComponent;
+
 		new Setting(containerEl)
 			.setName('Event spacing')
 			.setDesc('Spacing between timeline events')
-			.addSlider((slider) =>
-				slider
+			.addSlider((slider) => {
+				itemSpacingSlider = slider;
+				return slider
 					.setLimits(10, 40, 5)
 					.setValue(this.plugin.settings.itemSpacing)
 					.setDynamicTooltip()
 					.onChange(async (value: number) => {
 						this.plugin.settings.itemSpacing = value;
 						await this.plugin.saveSettings();
-					})
-			)
+					});
+			})
 			.addButton((button) =>
 				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.itemSpacing = 20;
 					await this.plugin.saveSettings();
-					this.display();
+					itemSpacingSlider.setValue(20);
 					new Notice('Default event spacing restored');
 				})
 			);
@@ -268,47 +283,53 @@ export class TimelineSettingTab extends PluginSettingTab {
 			);
 
 		// Collapse threshold
+		let collapseThresholdSlider: SliderComponent;
+
 		new Setting(containerEl)
 			.setName('Collapse threshold')
 			.setDesc('Number of events that triggers auto-collapse')
-			.addSlider((slider) =>
-				slider
+			.addSlider((slider) => {
+				collapseThresholdSlider = slider;
+				return slider
 					.setLimits(5, 50, 5)
 					.setValue(this.plugin.settings.collapseThreshold)
 					.setDynamicTooltip()
 					.onChange(async (value: number) => {
 						this.plugin.settings.collapseThreshold = value;
 						await this.plugin.saveSettings();
-					})
-			)
+					});
+			})
 			.addButton((button) =>
 				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.collapseThreshold = 10;
 					await this.plugin.saveSettings();
-					this.display();
+					collapseThresholdSlider.setValue(10);
 					new Notice('Default collapse threshold restored');
 				})
 			);
 
 		// Show count when collapsed
+		let collapseShowCountSlider: SliderComponent;
+
 		new Setting(containerEl)
 			.setName('Show when collapsed')
 			.setDesc('Number of events to show when collapsed')
-			.addSlider((slider) =>
-				slider
+			.addSlider((slider) => {
+				collapseShowCountSlider = slider;
+				return slider
 					.setLimits(1, 15, 1)
 					.setValue(this.plugin.settings.collapseShowCount)
 					.setDynamicTooltip()
 					.onChange(async (value: number) => {
 						this.plugin.settings.collapseShowCount = value;
 						await this.plugin.saveSettings();
-					})
-			)
+					});
+			})
 			.addButton((button) =>
 				button.setButtonText('Restore default').onClick(async () => {
 					this.plugin.settings.collapseShowCount = 5;
 					await this.plugin.saveSettings();
-					this.display();
+					collapseShowCountSlider.setValue(5);
 					new Notice('Default show count restored');
 				})
 			);
