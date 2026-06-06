@@ -1,7 +1,7 @@
 # 1st Timeline
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **Current version**: 1.4.2
+> **Current version**: 1.4.3
 
 ---
 
@@ -170,12 +170,17 @@ npm run lint         # ESLint check
 
 ## Changelog
 
-### 1.4.2
+### 1.4.3
 
 - Fixed deprecated `display()` calls in settings — replaced with direct component updates
-- Fixed deprecated `MarkdownRenderer.renderMarkdown` — switched to `MarkdownRenderer.render`
+- Fixed deprecated `MarkdownRenderer.renderMarkdown` — switched to `MarkdownRenderer.render` with a child `Component` for proper lifecycle management
+- Fixed `obsidianmd/no-plugin-as-component` by using `plugin.addChild(new Component())` instead of passing `plugin` directly
 - Fixed README title to match manifest.json plugin name
 - Added bilingual English/Chinese README
+
+### 1.4.2
+
+- Fixed community plugin review warnings (same as 1.4.3, initial fix rejected due to `eslint-disable` on `no-plugin-as-component`)
 
 ### 1.4.1
 
@@ -256,7 +261,7 @@ Issue reports and feature suggestions are welcome!
 # 第一时间轴 (1st Timeline)
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **当前版本**: 1.4.2
+> **当前版本**: 1.4.3
 
 ## 简介
 
@@ -423,12 +428,17 @@ npm run lint         # ESLint 代码检查
 
 ## 更新日志
 
-### 1.4.2
+### 1.4.3
 
 - 修复弃用的 `display()` 调用 — 改为直接更新组件
-- 修复弃用的 `MarkdownRenderer.renderMarkdown` — 切换为 `MarkdownRenderer.render`
+- 修复弃用的 `MarkdownRenderer.renderMarkdown` — 切换为 `MarkdownRenderer.render`，使用子 `Component` 进行生命周期管理
+- 修复 `obsidianmd/no-plugin-as-component` — 使用 `plugin.addChild(new Component())` 而非直接传入 `plugin`
 - 修复 README 标题与 manifest.json 插件名称不一致的问题
 - 新增中英双语 README
+
+### 1.4.2
+
+- 修复社区插件审核警告（与 1.4.3 内容相同，初次修复因对 `no-plugin-as-component` 使用 `eslint-disable` 被拒绝）
 
 ### 1.4.1
 
