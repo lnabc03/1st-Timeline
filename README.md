@@ -21,7 +21,7 @@
 
 1. 前往 [Releases 页面](https://github.com/lnabc03/1st-Timeline/releases)
 2. 下载最新版本的 `main.js`、`manifest.json`、`styles.css`
-3. 在 vault 中创建目录 `.obsidian/plugins/1st-timeline/`
+3. 在 vault 中创建目录 `.obsidian/plugins/first-timeline/`
 4. 将三个文件放入该目录
 5. 重启 Obsidian，在 **设置 → 社区插件** 中启用
 
@@ -34,9 +34,9 @@ npm install
 npm run build
 ```
 
-然后将 `main.js`、`manifest.json`、`styles.css` 复制到 `.obsidian/plugins/1st-timeline/` 目录，重启 Obsidian 并启用插件。
+然后将 `main.js`、`manifest.json`、`styles.css` 复制到 `.obsidian/plugins/first-timeline/` 目录，重启 Obsidian 并启用插件。
 
-> **注意**: 目标目录名必须与 `manifest.json` 中的 `id` 字段一致（`1st-timeline`）。
+> **注意**: 目标目录名必须与 `manifest.json` 中的 `id` 字段一致（`first-timeline`）。
 
 ---
 
