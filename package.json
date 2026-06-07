@@ -1,6 +1,6 @@
 {
 	"name": "first-timeline",
-	"version": "1.4.4",
+	"version": "1.4.5",
 	"description": "一个简单、优雅、中文友好的时间轴渲染插件",
 	"main": "main.js",
 	"type": "module",

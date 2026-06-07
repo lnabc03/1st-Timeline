@@ -58,6 +58,9 @@ export interface Locale {
 	tooltipDaysFromNow: (days: number) => string;
 	tooltipDaysAgo: (days: number) => string;
 
+	// Today badge
+	todayLabel: string;
+
 	// Collapse button
 	collapseShowAll: (count: number) => string;
 	collapseCollapse: string;
@@ -127,6 +130,8 @@ const EN: Locale = {
 	tooltipToday: 'Today',
 	tooltipDaysFromNow: (days: number) => `${days} days from now`,
 	tooltipDaysAgo: (days: number) => `${days} days ago`,
+
+	todayLabel: 'Today',
 
 	collapseShowAll: (count: number) => `Show all (+${count})`,
 	collapseCollapse: 'Collapse',
@@ -199,6 +204,8 @@ const ZH: Locale = {
 	tooltipToday: '今天',
 	tooltipDaysFromNow: (days: number) => `${days} 天后`,
 	tooltipDaysAgo: (days: number) => `${days} 天前`,
+
+	todayLabel: '今天',
 
 	collapseShowAll: (count: number) => `显示全部 (+${count})`,
 	collapseCollapse: '折叠',

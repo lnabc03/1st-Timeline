@@ -1,7 +1,7 @@
 # 1st Timeline
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **Current version**: 1.4.4
+> **Current version**: 1.4.5
 
 ---
 
@@ -170,6 +170,13 @@ npm run lint         # ESLint check
 
 ## Changelog
 
+### 1.4.5
+
+- Redesigned today-event highlighting: replaced subtle `border-left` with visible inset accent strip + "Today"/"今天" badge
+- Fixed today highlight z-order — accent strip no longer occluded by card content
+- Fixed mobile date text wrapping — dates now stay on one line with `nowrap` + ellipsis
+- Fixed mobile dot centering — dots now perfectly centered on timeline line using `calc()` with `--line-width`
+
 ### 1.4.4
 
 - Added bilingual Chinese/English support — auto-detects Obsidian language setting via `getLanguage()`
@@ -268,7 +275,7 @@ Issue reports and feature suggestions are welcome!
 # 第一时间轴 (1st Timeline)
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **当前版本**: 1.4.4
+> **当前版本**: 1.4.5
 
 ## 简介
 
@@ -434,6 +441,13 @@ npm run lint         # ESLint 代码检查
 ---
 
 ## 更新日志
+
+### 1.4.5
+
+- 重新设计当天事件高亮：用显眼的内嵌强调色条 + "今天"徽章替代原来的 `border-left`
+- 修复当天高亮图层问题 — 强调色条不再被卡片内容遮挡
+- 修复移动端日期文字强制换行 — 日期改为 `nowrap` + 省略号
+- 修复移动端时间点偏移 — 使用 `calc()` 配合 `--line-width` 实现精准居中
 
 ### 1.4.4
 

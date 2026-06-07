@@ -206,6 +206,7 @@ export function processTimelineBlock(
 
 		if (daysDiff === 0 && plugin.settings.highlightToday) {
 			contentEl.addClass('timeline-today');
+			contentEl.dataset.todayLabel = TR.todayLabel;
 		}
 
 		// Hover tooltip
