@@ -1,7 +1,7 @@
 # 1st Timeline
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **Current version**: 1.4.3
+> **Current version**: 1.4.4
 
 ---
 
@@ -162,13 +162,20 @@ npm run lint         # ESLint check
 
 ## Compatibility
 
-- Minimum Obsidian version: **1.0.0**
+- Minimum Obsidian version: **1.8.7**
 - Supports desktop and mobile devices
 - Light and dark theme compatible
 
 ---
 
 ## Changelog
+
+### 1.4.4
+
+- Added bilingual Chinese/English support — auto-detects Obsidian language setting via `getLanguage()`
+- All UI text now adapts: settings labels, command names, tooltips, error messages, modal dialogs
+- New `src/i18n.ts` locale module with EN and ZH translations
+- Bumped `minAppVersion` to 1.8.7 (required by `getLanguage()`)
 
 ### 1.4.3
 
@@ -261,7 +268,7 @@ Issue reports and feature suggestions are welcome!
 # 第一时间轴 (1st Timeline)
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **当前版本**: 1.4.3
+> **当前版本**: 1.4.4
 
 ## 简介
 
@@ -420,13 +427,20 @@ npm run lint         # ESLint 代码检查
 
 ## 兼容性
 
-- 最低 Obsidian 版本: **1.0.0**
+- 最低 Obsidian 版本: **1.8.7**
 - 支持桌面和移动设备
 - 适配明亮和暗黑主题
 
 ---
 
 ## 更新日志
+
+### 1.4.4
+
+- 新增中英文双语支持 — 通过 `getLanguage()` 自动检测 Obsidian 语言设置
+- 所有界面文字均适配语言：设置标签、命令名称、提示框、错误消息、模态对话框
+- 新增 `src/i18n.ts` 语言模块，包含完整中英文翻译
+- `minAppVersion` 提升至 1.8.7（`getLanguage()` 所需最低版本）
 
 ### 1.4.3
 

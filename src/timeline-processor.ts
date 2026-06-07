@@ -2,6 +2,7 @@ import { Component, MarkdownRenderer, type MarkdownPostProcessorContext } from '
 import type TimelinePlugin from './main';
 import { SINGLE_LINE_REGEX } from './constants';
 import { parseDateTime } from './date-parser';
+import { t } from './i18n';
 
 interface TimelineEvent {
 	date: Date;
@@ -124,24 +125,25 @@ export function processTimelineBlock(
 	});
 
 	// Empty block with content: show error
+		const T = t();
 	if (events.length === 0 && source.trim() !== '') {
 		timelineContainer.addClass('timeline-has-error');
 		const errorEl = timelineContainer.createEl('div', {
 			cls: 'timeline-error',
 		});
-		errorEl.createEl('strong', { text: 'Timeline parse error' });
+		errorEl.createEl('strong', { text: T.timelineParseError });
 		errorEl.createEl('p', {
-			text: 'No valid events could be parsed. Check the syntax:',
+			text: T.noValidEvents,
 		});
 		const listEl = errorEl.createEl('ul');
 		listEl.createEl('li', {
-			text: 'Date: content (colon separator)',
+			text: T.syntaxColon,
 		});
 		listEl.createEl('li', {
-			text: 'Date  content (two spaces separator)',
+			text: T.syntaxTwoSpaces,
 		});
 		listEl.createEl('li', {
-			text: 'Date (followed by newline and multi-line content)',
+			text: T.syntaxMultiline,
 		});
 		return;
 	}
@@ -151,6 +153,7 @@ export function processTimelineBlock(
 	plugin.addChild(renderComponent);
 
 	// Render each event
+	const TR = t(); // locale for tooltips and collapse button
 	const today = new Date();
 	today.setHours(0, 0, 0, 0);
 
@@ -212,11 +215,11 @@ export function processTimelineBlock(
 			});
 
 			if (daysDiff === 0) {
-				tooltipEl.setText('Today');
+				tooltipEl.setText(TR.tooltipToday);
 			} else if (daysDiff > 0) {
-				tooltipEl.setText(`${daysDiff} days from now`);
+				tooltipEl.setText(TR.tooltipDaysFromNow(daysDiff));
 			} else {
-				tooltipEl.setText(`${Math.abs(daysDiff)} days ago`);
+				tooltipEl.setText(TR.tooltipDaysAgo(Math.abs(daysDiff)));
 			}
 
 			let hoverTimer: number | null = null;
@@ -259,18 +262,18 @@ export function processTimelineBlock(
 		const collapseBtn = collapseBar.createEl('button', {
 			cls: 'timeline-collapse-btn',
 		});
-		collapseBtn.setText(`Show all (+${hiddenCount})`);
+		collapseBtn.setText(TR.collapseShowAll(hiddenCount));
 
 		let expanded = false;
 		plugin.registerDomEvent(collapseBtn, 'click', () => {
 			expanded = !expanded;
 			if (expanded) {
 				timelineContainer.removeClass('timeline-collapsed');
-				collapseBtn.setText('Collapse');
+				collapseBtn.setText(TR.collapseCollapse);
 				collapseGradient.addClass('timeline-collapse-gradient-hidden');
 			} else {
 				timelineContainer.addClass('timeline-collapsed');
-				collapseBtn.setText(`Show all (+${hiddenCount})`);
+				collapseBtn.setText(TR.collapseShowAll(hiddenCount));
 				collapseGradient.removeClass(
 					'timeline-collapse-gradient-hidden'
 				);

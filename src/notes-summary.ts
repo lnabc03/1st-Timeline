@@ -8,6 +8,7 @@ import {
 } from 'obsidian';
 import type TimelinePlugin from './main';
 import { DATE_RANGE_REGEX } from './constants';
+import { t } from './i18n';
 
 /**
  * Scans all vault Markdown files and aggregates them by frontmatter date field,
@@ -86,13 +87,15 @@ export async function generateNotesTimeline(
 		}
 
 		if (!timelineContent) {
-			return 'No notes found in the selected date range.';
+			return t().noticeNoNotesFound;
 		}
 
 		return timelineContent;
 	} catch (err) {
 		console.error('Error generating notes summary:', err);
-		return `Error generating notes summary: ${err instanceof Error ? err.message : String(err)}`;
+		return t().errorGeneratingSummary(
+			err instanceof Error ? err.message : String(err)
+		);
 	}
 }
 
@@ -107,15 +110,15 @@ export class DateRangeModal extends Modal {
 
 	onOpen(): void {
 		const { contentEl } = this;
-		contentEl.createEl('h2', { text: 'Notes summary' });
+		const T = t();
+
+		contentEl.createEl('h2', { text: T.modalTitle });
 
 		const paragraph = contentEl.createEl('p');
-		paragraph.appendText(
-			'Enter a date range (YYYY-MM-DD,YYYY-MM-DD)'
-		);
+		paragraph.appendText(T.modalDateRangePrompt);
 		paragraph.appendChild(activeDocument.createElement('br'));
 		paragraph.appendText(
-			`Timeline will summarize notes by the property "${this.plugin.settings.createdDateField}"`
+			T.modalTimelineNote(this.plugin.settings.createdDateField)
 		);
 
 		const inputContainer = contentEl.createDiv();
@@ -145,14 +148,14 @@ export class DateRangeModal extends Modal {
 		buttonContainer.addClass('timeline-modal-buttons');
 
 		const cancelButton = buttonContainer.createEl('button', {
-			text: 'Cancel',
+			text: T.modalCancel,
 		});
 		this.plugin.registerDomEvent(cancelButton, 'click', () => {
 			this.close();
 		});
 
 		const confirmButton = buttonContainer.createEl('button', {
-			text: 'Confirm',
+			text: T.modalConfirm,
 			cls: 'mod-cta',
 		});
 		confirmButton.addClass('timeline-modal-confirm');
@@ -160,9 +163,7 @@ export class DateRangeModal extends Modal {
 		this.plugin.registerDomEvent(confirmButton, 'click', async () => {
 			const dateRange = dateRangeInput.getValue().split(',');
 			if (dateRange.length !== 2) {
-				new Notice(
-					'Invalid date range. Use the format yyyy-mm-dd,yyyy-mm-dd'
-				);
+				new Notice(T.noticeInvalidDateRange);
 				return;
 			}
 			const [startDate, endDate] = dateRange;
@@ -170,7 +171,7 @@ export class DateRangeModal extends Modal {
 				!DATE_RANGE_REGEX.test(startDate!) ||
 				!DATE_RANGE_REGEX.test(endDate!)
 			) {
-				new Notice('Invalid date format. Use yyyy-mm-dd');
+				new Notice(T.noticeInvalidDateFormat);
 				return;
 			}
 
@@ -188,9 +189,9 @@ export class DateRangeModal extends Modal {
 					`\`\`\`timeline\n${timelineContent}\`\`\`\n`,
 					cursor
 				);
-				new Notice('Notes timeline generated');
+				new Notice(T.noticeTimelineGenerated);
 			} else {
-				new Notice('Unable to insert timeline. Make sure an editor is open.');
+				new Notice(T.noticeNoEditor);
 			}
 			this.close();
 		});

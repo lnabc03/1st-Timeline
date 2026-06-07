@@ -1,6 +1,7 @@
 import { type App, Notice, PluginSettingTab, Setting, type SliderComponent, TextComponent } from 'obsidian';
 import type TimelinePlugin from './main';
 import { COLOR_PRESETS } from './constants';
+import { t } from './i18n';
 
 export interface TimelinePluginSettings {
 	sortDirection: 'asc' | 'desc';
@@ -43,18 +44,19 @@ export class TimelineSettingTab extends PluginSettingTab {
 	display(): void {
 		const { containerEl } = this;
 		containerEl.empty();
+		const T = t();
 
 		new Setting(containerEl)
-			.setName('First timeline')
+			.setName(T.headingFirstTimeline)
 			.setHeading();
 
 		new Setting(containerEl)
-			.setName('Sort direction')
-			.setDesc('Sort order for timeline events')
+			.setName(T.sortDirection)
+			.setDesc(T.sortDirectionDesc)
 			.addDropdown((dropdown) =>
 				dropdown
-					.addOption('asc', 'Ascending (earliest first)')
-					.addOption('desc', 'Descending (latest first)')
+					.addOption('asc', T.sortDirectionAscLabel)
+					.addOption('desc', T.sortDirectionDescLabel)
 					.setValue(this.plugin.settings.sortDirection)
 					.onChange(async (value: string) => {
 						this.plugin.settings.sortDirection = value as 'asc' | 'desc';
@@ -65,8 +67,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 		let createdDateFieldComponent: TextComponent;
 
 		new Setting(containerEl)
-			.setName('Date property for notes summary')
-			.setDesc('Frontmatter property containing a date (yyyy-mm-dd)')
+			.setName(T.datePropertyForNotes)
+			.setDesc(T.datePropertyDesc)
 			.addText((text) => {
 				createdDateFieldComponent = text;
 				return text
@@ -77,18 +79,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					});
 			})
 			.addButton((button) =>
-				button.setButtonText('Restore default').onClick(async () => {
+				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.createdDateField = 'created';
 					await this.plugin.saveSettings();
 					createdDateFieldComponent.setValue('created');
-					new Notice('Default property name restored');
+					new Notice(T.noticeDefaultRestored);
 				})
 			);
 
 		// Color settings with preset buttons
 		const colorSetting = new Setting(containerEl)
-			.setName('Timeline color')
-			.setDesc('Color of the timeline line and dots');
+			.setName(T.timelineColor)
+			.setDesc(T.timelineColorDesc);
 
 		const colorSettingControl = colorSetting.controlEl.createEl('div', {
 			cls: 'timeline-color-setting-container',
@@ -133,14 +135,14 @@ export class TimelineSettingTab extends PluginSettingTab {
 				await this.plugin.saveSettings();
 				(colorInput.components[0] as TextComponent)?.setValue(preset.value);
 				colorPreview.style.backgroundColor = preset.value;
-				new Notice(`Set to ${preset.name} theme`);
+				new Notice(T.noticeSetToTheme(preset.name));
 			});
 		}
 
 		// Hover tooltip
 		new Setting(containerEl)
-			.setName('Hover tooltip')
-			.setDesc('Show days until or since on hover')
+			.setName(T.hoverTooltip)
+			.setDesc(T.hoverTooltipDesc)
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.showTooltip)
@@ -154,8 +156,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 		let tooltipDelaySlider: SliderComponent;
 
 		new Setting(containerEl)
-			.setName('Hover delay')
-			.setDesc('Delay before the tooltip appears (milliseconds)')
+			.setName(T.hoverDelay)
+			.setDesc(T.hoverDelayDesc)
 			.addSlider((slider) => {
 				tooltipDelaySlider = slider;
 				return slider
@@ -168,18 +170,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					});
 			})
 			.addButton((button) =>
-				button.setButtonText('Restore default').onClick(async () => {
+				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.tooltipDelay = 500;
 					await this.plugin.saveSettings();
 					tooltipDelaySlider.setValue(500);
-					new Notice('Default hover delay restored');
+					new Notice(T.noticeHoverDelayRestored);
 				})
 			);
 
 		// Highlight today
 		new Setting(containerEl)
-			.setName('Highlight today')
-			.setDesc('Highlight events on the current day')
+			.setName(T.highlightToday)
+			.setDesc(T.highlightTodayDesc)
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.highlightToday)
@@ -193,8 +195,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 		let dotSizeSlider: SliderComponent;
 
 		new Setting(containerEl)
-			.setName('Dot size')
-			.setDesc('Size of timeline dots')
+			.setName(T.dotSize)
+			.setDesc(T.dotSizeDesc)
 			.addSlider((slider) => {
 				dotSizeSlider = slider;
 				return slider
@@ -207,11 +209,11 @@ export class TimelineSettingTab extends PluginSettingTab {
 					});
 			})
 			.addButton((button) =>
-				button.setButtonText('Restore default').onClick(async () => {
+				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.dotSize = 12;
 					await this.plugin.saveSettings();
 					dotSizeSlider.setValue(12);
-					new Notice('Default dot size restored');
+					new Notice(T.noticeDotSizeRestored);
 				})
 			);
 
@@ -219,8 +221,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 		let lineWidthSlider: SliderComponent;
 
 		new Setting(containerEl)
-			.setName('Line width')
-			.setDesc('Width of the timeline line')
+			.setName(T.lineWidth)
+			.setDesc(T.lineWidthDesc)
 			.addSlider((slider) => {
 				lineWidthSlider = slider;
 				return slider
@@ -233,11 +235,11 @@ export class TimelineSettingTab extends PluginSettingTab {
 					});
 			})
 			.addButton((button) =>
-				button.setButtonText('Restore default').onClick(async () => {
+				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.lineWidth = 2;
 					await this.plugin.saveSettings();
 					lineWidthSlider.setValue(2);
-					new Notice('Default line width restored');
+					new Notice(T.noticeLineWidthRestored);
 				})
 			);
 
@@ -245,8 +247,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 		let itemSpacingSlider: SliderComponent;
 
 		new Setting(containerEl)
-			.setName('Event spacing')
-			.setDesc('Spacing between timeline events')
+			.setName(T.eventSpacing)
+			.setDesc(T.eventSpacingDesc)
 			.addSlider((slider) => {
 				itemSpacingSlider = slider;
 				return slider
@@ -259,20 +261,18 @@ export class TimelineSettingTab extends PluginSettingTab {
 					});
 			})
 			.addButton((button) =>
-				button.setButtonText('Restore default').onClick(async () => {
+				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.itemSpacing = 20;
 					await this.plugin.saveSettings();
 					itemSpacingSlider.setValue(20);
-					new Notice('Default event spacing restored');
+					new Notice(T.noticeEventSpacingRestored);
 				})
 			);
 
 		// Auto collapse
 		new Setting(containerEl)
-			.setName('Auto collapse')
-			.setDesc(
-				'Auto-collapse timeline when events exceed threshold, showing only events closest to today'
-			)
+			.setName(T.autoCollapse)
+			.setDesc(T.autoCollapseDesc)
 			.addToggle((toggle) =>
 				toggle
 					.setValue(this.plugin.settings.autoCollapse)
@@ -286,8 +286,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 		let collapseThresholdSlider: SliderComponent;
 
 		new Setting(containerEl)
-			.setName('Collapse threshold')
-			.setDesc('Number of events that triggers auto-collapse')
+			.setName(T.collapseThreshold)
+			.setDesc(T.collapseThresholdDesc)
 			.addSlider((slider) => {
 				collapseThresholdSlider = slider;
 				return slider
@@ -300,11 +300,11 @@ export class TimelineSettingTab extends PluginSettingTab {
 					});
 			})
 			.addButton((button) =>
-				button.setButtonText('Restore default').onClick(async () => {
+				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.collapseThreshold = 10;
 					await this.plugin.saveSettings();
 					collapseThresholdSlider.setValue(10);
-					new Notice('Default collapse threshold restored');
+					new Notice(T.noticeCollapseThresholdRestored);
 				})
 			);
 
@@ -312,8 +312,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 		let collapseShowCountSlider: SliderComponent;
 
 		new Setting(containerEl)
-			.setName('Show when collapsed')
-			.setDesc('Number of events to show when collapsed')
+			.setName(T.showWhenCollapsed)
+			.setDesc(T.showWhenCollapsedDesc)
 			.addSlider((slider) => {
 				collapseShowCountSlider = slider;
 				return slider
@@ -326,11 +326,11 @@ export class TimelineSettingTab extends PluginSettingTab {
 					});
 			})
 			.addButton((button) =>
-				button.setButtonText('Restore default').onClick(async () => {
+				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.collapseShowCount = 5;
 					await this.plugin.saveSettings();
 					collapseShowCountSlider.setValue(5);
-					new Notice('Default show count restored');
+					new Notice(T.noticeShowCountRestored);
 				})
 			);
 	}

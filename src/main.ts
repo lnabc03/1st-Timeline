@@ -6,6 +6,7 @@ import {
 } from './settings';
 import { processTimelineBlock } from './timeline-processor';
 import { DateRangeModal } from './notes-summary';
+import { t } from './i18n';
 
 export default class TimelinePlugin extends Plugin {
 	settings!: TimelinePluginSettings;
@@ -18,7 +19,7 @@ export default class TimelinePlugin extends Plugin {
 
 		this.addCommand({
 			id: 'generate-notes-timeline',
-			name: 'Notes summary',
+			name: t().commandNotesSummary,
 			callback: () => {
 				new DateRangeModal(this.app, this).open();
 			},
