@@ -275,26 +275,22 @@
 /* --- 响应式设计 --- */
 @media (max-width: 600px) {
   .timeline-container::before {
-    left: 40px;
+    left: 68px;
   }
 
   .timeline-item {
-    padding-left: 70px;
+    padding-left: 100px;
   }
 
   .timeline-date {
     left: 0;
-    width: 35px;
+    width: 58px;
     text-align: left;
     font-size: 0.7em;
-    white-space: nowrap;
-    word-break: normal;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .timeline-dot {
-    left: calc(40px + var(--line-width) / 2);
+    left: calc(68px + var(--line-width) / 2);
   }
 
   .timeline-tooltip {
@@ -302,11 +298,11 @@
   }
 
   .timeline-collapse-bar {
-    padding-left: 70px;
+    padding-left: 100px;
   }
 
   .timeline-collapse-gradient {
-    left: 70px;
+    left: 100px;
   }
 }
 
@@ -413,6 +409,13 @@
 /* --- 设置页面颜色输入框 --- */
 .timeline-color-setting-container {
   flex-wrap: wrap;
+}
+
+.timeline-color-presets-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
 }
 
 .timeline-color-setting-container .setting-item {

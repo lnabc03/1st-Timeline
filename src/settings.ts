@@ -120,8 +120,12 @@ export class TimelineSettingTab extends PluginSettingTab {
 					})
 			);
 
+		const presetsRow = colorSetting.controlEl.createEl('div', {
+			cls: 'timeline-color-presets-row',
+		});
+
 		for (const preset of COLOR_PRESETS) {
-			const presetButton = colorSettingControl.createEl('div', {
+			const presetButton = presetsRow.createEl('div', {
 				cls: 'timeline-preset-color',
 				attr: {
 					'data-color': preset.value,
