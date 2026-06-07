@@ -278,14 +278,24 @@
 /* --- 响应式设计 --- */
 @media (max-width: 600px) {
   .timeline-container {
-    --date-width: 10ch;
-    --line-left: calc(var(--date-width) + 12px);
-    --content-pad: calc(var(--date-width) + 48px);
+    --date-width: auto;
+    --line-left: 16px;
+    --content-pad: 40px;
+  }
+
+  .timeline-item {
+    padding-left: var(--content-pad);
+    padding-top: 28px;
   }
 
   .timeline-date {
+    position: absolute;
+    top: 0;
+    left: var(--content-pad);
+    width: calc(100% - var(--content-pad));
     text-align: left;
-    font-size: 0.7em;
+    font-size: 0.75em;
+    font-weight: 600;
     white-space: nowrap;
     word-break: normal;
   }
@@ -366,10 +376,8 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  margin-right: 10px;
   border: 1px solid var(--background-modifier-border);
-  display: inline-block;
-  vertical-align: middle;
+  flex-shrink: 0;
 }
 
 .timeline-color-presets {
@@ -384,7 +392,6 @@
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  margin-right: 10px;
   border: 1px solid var(--background-modifier-border);
   cursor: pointer;
   flex-shrink: 0;
@@ -397,7 +404,9 @@
 
 /* --- 设置页面颜色输入框 --- */
 .timeline-color-setting-container {
-  flex-wrap: wrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .timeline-color-presets-row {
@@ -407,18 +416,15 @@
   margin-top: 6px;
 }
 
-.timeline-color-setting-container .setting-item {
-  border: none;
-  padding: 0;
-  align-self: center;
-}
-
-.timeline-color-setting-container .setting-item-control {
-  margin-right: 0;
-}
-
-.timeline-color-input input {
+.timeline-color-input {
   width: 75px;
+  height: 26px;
+  padding: 2px 6px;
+  font-size: 0.9em;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-normal);
 }
 
 /* --- 笔记汇总弹窗 --- */

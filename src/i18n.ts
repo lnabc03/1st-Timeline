@@ -155,7 +155,7 @@ const EN: Locale = {
 
 /** Chinese locale */
 const ZH: Locale = {
-	headingFirstTimeline: '第一时间轴',
+	headingFirstTimeline: '1st Timeline',
 	sortDirection: '排序方向',
 	sortDirectionDesc: '时间轴事件的排列顺序',
 	sortDirectionAscLabel: '升序（最早在前）',
