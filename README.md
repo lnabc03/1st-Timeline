@@ -1,7 +1,7 @@
 # 1st Timeline
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **Current version**: 1.4.6
+> **Current version**: 1.4.7
 
 ---
 
@@ -170,10 +170,16 @@ npm run lint         # ESLint check
 
 ## Changelog
 
+### 1.4.7
+
+- Settings: color preview + input vertically centered on same row; presets on separate row below
+- Mobile timeline: refactored positioning with CSS custom properties (`--date-width`, `--line-left`, `--content-pad`)
+- Mobile dates use `10ch` width (character-based, adapts to font size) — no more truncation
+
 ### 1.4.6
 
 - Moved preset color buttons to their own row below the color input for clean mobile layout
-- Mobile timeline: dates now show in full width (no truncation), event cards shrink to fit
+- Mobile timeline: increased date width, shifted line/dot right to accommodate full dates
 
 ### 1.4.5
 
@@ -281,7 +287,7 @@ Issue reports and feature suggestions are welcome!
 # 第一时间轴 (1st Timeline)
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **当前版本**: 1.4.6
+> **当前版本**: 1.4.7
 
 ## 简介
 
@@ -448,10 +454,16 @@ npm run lint         # ESLint 代码检查
 
 ## 更新日志
 
+### 1.4.7
+
+- 设置页：颜色预览与输入框在同一行垂直居中；预设按钮独立一行
+- 移动端时间轴：使用 CSS 自定义属性重构定位（`--date-width`、`--line-left`、`--content-pad`）
+- 移动端日期宽度改用 `10ch`（字符单位，随字号自适应）——不再截断
+
 ### 1.4.6
 
 - 预设颜色按钮移至颜色输入框下方独立一行，移动端布局更整洁
-- 移动端时间轴：日期完整显示（不再截断变 "202..."），事件卡片自动收缩换行
+- 移动端时间轴：加宽日期区域，时间线/光点右移，日期完整显示
 
 ### 1.4.5
 

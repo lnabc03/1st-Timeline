@@ -8,6 +8,9 @@
   --dot-size: 12px;
   --line-width: 2px;
   --item-spacing: 20px;
+  --date-width: 90px;
+  --line-left: 99px;
+  --content-pad: 130px;
 
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   margin: 24px 0;
@@ -19,7 +22,7 @@
 .timeline-container::before {
   content: '';
   position: absolute;
-  left: 99px;
+  left: var(--line-left);
   top: 8px;
   bottom: 8px;
   width: var(--line-width);
@@ -39,7 +42,7 @@
 .timeline-item {
   position: relative;
   margin-bottom: var(--item-spacing);
-  padding-left: 130px;
+  padding-left: var(--content-pad);
   display: flex;
   flex-direction: column;
   transition: opacity 0.4s ease, max-height 0.4s ease, margin-bottom 0.4s ease;
@@ -69,7 +72,7 @@
 .timeline-date {
   position: absolute;
   left: 0;
-  width: 90px;
+  width: var(--date-width);
   text-align: right;
   color: var(--text-muted);
   font-size: 0.8em;
@@ -88,7 +91,7 @@
 /* --- 时间轴点 --- */
 .timeline-dot {
   position: absolute;
-  left: calc(99px + var(--line-width) / 2);
+  left: calc(var(--line-left) + var(--line-width) / 2);
   width: var(--dot-size);
   height: var(--dot-size);
   border-radius: 50%;
@@ -212,14 +215,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px 0 8px 130px;
+  padding: 20px 0 8px var(--content-pad);
   z-index: 2;
 }
 
 /* --- 折叠渐变遮罩 --- */
 .timeline-collapse-gradient {
   position: absolute;
-  left: 130px;
+  left: var(--content-pad);
   right: 0;
   top: -40px;
   height: 40px;
@@ -274,35 +277,21 @@
 
 /* --- 响应式设计 --- */
 @media (max-width: 600px) {
-  .timeline-container::before {
-    left: 68px;
-  }
-
-  .timeline-item {
-    padding-left: 100px;
+  .timeline-container {
+    --date-width: 10ch;
+    --line-left: calc(var(--date-width) + 12px);
+    --content-pad: calc(var(--date-width) + 48px);
   }
 
   .timeline-date {
-    left: 0;
-    width: 58px;
     text-align: left;
     font-size: 0.7em;
-  }
-
-  .timeline-dot {
-    left: calc(68px + var(--line-width) / 2);
+    white-space: nowrap;
+    word-break: normal;
   }
 
   .timeline-tooltip {
     font-size: 0.8em;
-  }
-
-  .timeline-collapse-bar {
-    padding-left: 100px;
-  }
-
-  .timeline-collapse-gradient {
-    left: 100px;
   }
 }
 
@@ -421,6 +410,7 @@
 .timeline-color-setting-container .setting-item {
   border: none;
   padding: 0;
+  align-self: center;
 }
 
 .timeline-color-setting-container .setting-item-control {
