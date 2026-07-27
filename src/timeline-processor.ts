@@ -2,6 +2,11 @@ import { Component, MarkdownRenderer, type MarkdownPostProcessorContext } from '
 import type TimelinePlugin from './main';
 import { SINGLE_LINE_REGEX } from './constants';
 import { parseDateTime } from './date-parser';
+import {
+	findSourceDirective,
+	loadSourceText,
+	parseSourceDirective,
+} from './timeline-source';
 import { t } from './i18n';
 
 interface TimelineEvent {
@@ -12,15 +17,11 @@ interface TimelineEvent {
 }
 
 /**
- * Parses and renders a timeline code block.
- * Called by the code block processor callback in main.ts.
+ * Parses timeline events from code block text.
+ * Source directive lines are skipped, so nested directives in
+ * referenced files are silently ignored.
  */
-export function processTimelineBlock(
-	source: string,
-	el: HTMLElement,
-	ctx: MarkdownPostProcessorContext,
-	plugin: TimelinePlugin
-): void {
+function parseEvents(source: string): TimelineEvent[] {
 	const events: TimelineEvent[] = [];
 	const lines = source.split('\n');
 
@@ -34,6 +35,10 @@ export function processTimelineBlock(
 			if (currentEvent) {
 				currentContent.push(line);
 			}
+			continue;
+		}
+
+		if (parseSourceDirective(trimmedLine) !== null) {
 			continue;
 		}
 
@@ -86,6 +91,59 @@ export function processTimelineBlock(
 		}
 	}
 
+	return events;
+}
+
+/**
+ * Merges inline and referenced events, deduplicating entries with
+ * identical date and content. Inline events win over sourced ones.
+ */
+function mergeEvents(
+	inlineEvents: TimelineEvent[],
+	sourcedEvents: TimelineEvent[]
+): TimelineEvent[] {
+	const seen = new Set<string>();
+	const merged: TimelineEvent[] = [];
+	for (const event of [...inlineEvents, ...sourcedEvents]) {
+		const key = `${event.date.getTime()}\n${event.content}`;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		merged.push(event);
+	}
+	return merged;
+}
+
+/**
+ * Parses and renders a timeline code block.
+ * Called by the code block processor callback in main.ts.
+ */
+export async function processTimelineBlock(
+	source: string,
+	el: HTMLElement,
+	ctx: MarkdownPostProcessorContext,
+	plugin: TimelinePlugin
+): Promise<void> {
+	const T = t();
+	let events = parseEvents(source);
+	let sourceError: string | null = null;
+
+	// Source directive: merge events from a referenced file
+	const directiveLink = findSourceDirective(source);
+	if (directiveLink) {
+		const result = await loadSourceText(
+			plugin.app,
+			directiveLink,
+			ctx.sourcePath
+		);
+		if (result.ok) {
+			events = mergeEvents(events, parseEvents(result.text));
+		} else if (result.reason === 'not-found') {
+			sourceError = T.sourceFileNotFound(result.link);
+		} else {
+			sourceError = T.sourceNoTimelineBlock(result.link);
+		}
+	}
+
 	// Sort events
 	events.sort((a, b) => {
 		const direction = plugin.settings.sortDirection === 'asc' ? 1 : -1;
@@ -124,9 +182,17 @@ export function processTimelineBlock(
 		},
 	});
 
-	// Empty block with content: show error
-		const T = t();
-	if (events.length === 0 && source.trim() !== '') {
+	// Source directive failed: show error, but still render inline events
+	if (sourceError) {
+		const errorEl = timelineContainer.createEl('div', {
+			cls: 'timeline-error',
+		});
+		errorEl.createEl('strong', { text: T.timelineParseError });
+		errorEl.createEl('p', { text: sourceError });
+	}
+
+	// Non-empty block with no events and no source error: show syntax error
+	if (events.length === 0 && source.trim() !== '' && !sourceError) {
 		timelineContainer.addClass('timeline-has-error');
 		const errorEl = timelineContainer.createEl('div', {
 			cls: 'timeline-error',

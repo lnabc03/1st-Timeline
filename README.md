@@ -78,6 +78,30 @@ npm run build
 | 英文冒号 | `:` | `2024-05-01:事件内容` |
 | 仅日期（多行） | 换行 | 日期独占一行，后续行为事件内容 |
 
+### 时间轴链接
+
+用 `source:` 指令引用另一个笔记中的时间轴，避免在日记模板里重复硬编码相同的事件：
+
+````markdown
+```timeline
+source: [[工作安排]]
+2026-08-20：只属于本篇笔记的事件
+```
+````
+
+- 被引用的笔记中，事件需写在 ` ```timeline ` 代码块内（可混写其他任意内容）
+- 指令关键字支持 `source:` 和 `源：`（中英文冒号均可），可出现在代码块任意位置，仅第一个生效
+- 引用的事件与代码块内的事件合并排序渲染；日期和内容完全相同的条目自动去重（代码块内优先）
+- 链接解析与 Obsidian 内链规则一致，文件改名后可自动跟踪；源文件修改后重新打开笔记即可刷新
+
+### 归档过期事件
+
+在包含时间轴的笔记中执行命令面板的 **"归档过期事件 / Archive past events"** 命令：
+
+- 当前文件所有 ` ```timeline ` 代码块中，日期早于今天的事件会被移出代码块
+- 过期事件追加到同文件的「已归档：」区域（纯文本保留原始格式）；区域不存在时在文件末尾自动创建
+- 重复执行时识别已有归档区并追加，今天及未来的事件保留在块内
+
 ### 笔记汇总
 
 使用命令面板（`Ctrl+P`）执行 **"笔记汇总 / Notes summary"** 命令：
@@ -243,6 +267,30 @@ A new year begins! (multi-line text)
 | Chinese colon | `：` | `2024年3月8日：Event content` |
 | English colon | `:` | `2024-05-01: Event content` |
 | Date only (multi-line) | Newline | Date on one line, content on following lines |
+
+### Timeline Source
+
+Use the `source:` directive to render a timeline stored in another note, avoiding hardcoded duplicates in daily note templates:
+
+````markdown
+```timeline
+source: [[Work Schedule]]
+2026-08-20: An event unique to this note
+```
+````
+
+- In the referenced note, events must live inside a ` ```timeline ` code block (other content is allowed)
+- The directive accepts `source:` or `源：` (either colon), may appear anywhere in the block, and only the first one takes effect
+- Referenced events are merged and sorted with inline events; entries with identical date and content are deduplicated (inline wins)
+- Link resolution follows Obsidian's internal link rules and survives file renames; reopen the note to refresh after editing the source file
+
+### Archive Past Events
+
+Run the **"Archive past events / 归档过期事件"** command from the command palette in a note containing timelines:
+
+- Events dated before today are moved out of every ` ```timeline ` code block in the current file
+- Archived events are appended to an "Archived:" section in the same file (kept as plain text in original format); the section is created at the end of the file if absent
+- Running the command again appends to the existing section; today's and future events stay in the block
 
 ### Notes Summary
 

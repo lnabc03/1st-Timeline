@@ -45,6 +45,7 @@ export interface Locale {
 
 	// Command
 	commandNotesSummary: string;
+	commandArchivePastEvents: string;
 
 	// Timeline error messages
 	timelineParseError: string;
@@ -52,6 +53,10 @@ export interface Locale {
 	syntaxColon: string;
 	syntaxTwoSpaces: string;
 	syntaxMultiline: string;
+
+	// Timeline source directive errors
+	sourceFileNotFound: (link: string) => string;
+	sourceNoTimelineBlock: (file: string) => string;
 
 	// Timeline tooltips
 	tooltipToday: string;
@@ -77,6 +82,12 @@ export interface Locale {
 	noticeNoEditor: string;
 	noticeNoNotesFound: string;
 	errorGeneratingSummary: (message: string) => string;
+
+	// Archive past events command
+	archiveHeader: string;
+	noticeArchived: (count: number) => string;
+	noticeNoPastEvents: string;
+	noticeNoActiveFile: string;
 }
 
 /** English locale */
@@ -120,12 +131,17 @@ const EN: Locale = {
 	noticeShowCountRestored: 'Default show count restored',
 
 	commandNotesSummary: 'Notes summary',
+	commandArchivePastEvents: 'Archive past events',
 
 	timelineParseError: 'Timeline parse error',
 	noValidEvents: 'No valid events could be parsed. Check the syntax:',
 	syntaxColon: 'Date: content (colon separator)',
 	syntaxTwoSpaces: 'Date  content (two spaces separator)',
 	syntaxMultiline: 'Date (followed by newline and multi-line content)',
+
+	sourceFileNotFound: (link: string) => `File not found: ${link}`,
+	sourceNoTimelineBlock: (file: string) =>
+		`No timeline code block found in: ${file}`,
 
 	tooltipToday: 'Today',
 	tooltipDaysFromNow: (days: number) => `${days} days from now`,
@@ -151,6 +167,11 @@ const EN: Locale = {
 	noticeNoNotesFound: 'No notes found in the selected date range.',
 	errorGeneratingSummary: (message: string) =>
 		`Error generating notes summary: ${message}`,
+
+	archiveHeader: 'Archived:',
+	noticeArchived: (count: number) => `Archived ${count} past events`,
+	noticeNoPastEvents: 'No past events to archive.',
+	noticeNoActiveFile: 'No active Markdown file.',
 };
 
 /** Chinese locale */
@@ -194,12 +215,17 @@ const ZH: Locale = {
 	noticeShowCountRestored: '已恢复默认显示数量',
 
 	commandNotesSummary: '笔记汇总',
+	commandArchivePastEvents: '归档过期事件',
 
 	timelineParseError: '时间轴解析错误',
 	noValidEvents: '无法解析任何有效事件。请检查语法：',
 	syntaxColon: '日期：内容（冒号分隔）',
 	syntaxTwoSpaces: '日期  内容（两个空格分隔）',
 	syntaxMultiline: '日期（独占一行，后续行为事件内容）',
+
+	sourceFileNotFound: (link: string) => `找不到文件：${link}`,
+	sourceNoTimelineBlock: (file: string) =>
+		`文件中没有 timeline 代码块：${file}`,
 
 	tooltipToday: '今天',
 	tooltipDaysFromNow: (days: number) => `${days} 天后`,
@@ -223,6 +249,11 @@ const ZH: Locale = {
 	noticeNoNotesFound: '在所选日期范围内未找到笔记。',
 	errorGeneratingSummary: (message: string) =>
 		`生成笔记汇总时出错：${message}`,
+
+	archiveHeader: '已归档：',
+	noticeArchived: (count: number) => `已归档 ${count} 个过期事件`,
+	noticeNoPastEvents: '没有需要归档的过期事件。',
+	noticeNoActiveFile: '没有打开的 Markdown 文件。',
 };
 
 /**

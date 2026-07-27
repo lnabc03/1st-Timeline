@@ -6,6 +6,7 @@ import {
 } from './settings';
 import { processTimelineBlock } from './timeline-processor';
 import { DateRangeModal } from './notes-summary';
+import { archivePastEvents } from './archive-events';
 import { t } from './i18n';
 
 export default class TimelinePlugin extends Plugin {
@@ -25,10 +26,18 @@ export default class TimelinePlugin extends Plugin {
 			},
 		});
 
+		this.addCommand({
+			id: 'archive-past-events',
+			name: t().commandArchivePastEvents,
+			callback: () => {
+				void archivePastEvents(this);
+			},
+		});
+
 		this.registerMarkdownCodeBlockProcessor(
 			'timeline',
 			(source, el, ctx) => {
-				processTimelineBlock(source, el, ctx, this);
+				void processTimelineBlock(source, el, ctx, this);
 			}
 		);
 	}
