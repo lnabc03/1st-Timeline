@@ -275,6 +275,7 @@ export async function processTimelineBlock(
 	todayStart.setHours(0, 0, 0, 0);
 
 	let rangesEl: HTMLElement | null = null;
+	let hasActiveRange = false;
 	if (plugin.settings.showRangeBars && ranges.length > 0) {
 		rangesEl = el.createDiv({
 			cls: 'timeline-ranges',
@@ -316,6 +317,7 @@ export async function processTimelineBlock(
 				percent = 100;
 			} else {
 				statusCls = 'timeline-range-active';
+				hasActiveRange = true;
 				const elapsed = Math.round(
 					(todayStart.getTime() - startDay.getTime()) / DAY_MS
 				);
@@ -343,6 +345,11 @@ export async function processTimelineBlock(
 			});
 
 			attachHoverTooltip(plugin, item, range.display);
+		}
+
+		// 折叠且无进行中进度条时隐藏整个区域
+		if (isCollapsed && !hasActiveRange) {
+			rangesEl.addClass('timeline-ranges-empty-collapsed');
 		}
 	}
 
@@ -483,6 +490,10 @@ export async function processTimelineBlock(
 		plugin.registerDomEvent(collapseBtn, 'click', () => {
 			expanded = !expanded;
 			rangesEl?.toggleClass('timeline-ranges-collapsed', !expanded);
+			rangesEl?.toggleClass(
+				'timeline-ranges-empty-collapsed',
+				!expanded && !hasActiveRange
+			);
 			if (expanded) {
 				timelineContainer.removeClass('timeline-collapsed');
 				collapseBtn.setText(TR.collapseCollapse);

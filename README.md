@@ -2,7 +2,7 @@
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **当前版本 (Current version)**: 1.5.2
+> **当前版本 (Current version)**: 1.5.3
 
 ---
 
@@ -225,7 +225,7 @@ npm run lint         # ESLint 代码检查
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **Current version**: 1.5.2
+> **Current version**: 1.5.3
 
 ## Description
 

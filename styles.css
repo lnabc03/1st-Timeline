@@ -27,8 +27,8 @@
   display: none;
 }
 
-/* 折叠时若无进行中的进度条，隐藏整个区域 */
-.timeline-ranges-collapsed:not(:has(.timeline-range-active)) {
+/* 折叠时若无进行中的进度条，隐藏整个区域（由 JS 添加此类，避免 :has 的性能问题） */
+.timeline-ranges-empty-collapsed {
   display: none;
 }
 
@@ -426,6 +426,18 @@
 
   .timeline-tooltip {
     font-size: 0.8em;
+  }
+
+  /* 事件框高度缩减约 1/3（内边距 14→9px + 字号略缩） */
+  .timeline-content {
+    padding: 9px 14px;
+    font-size: 0.92em;
+  }
+
+  /* 折叠/展开的 max-height 动画在移动端会引起页面抖动，改为即时切换 */
+  .timeline-item,
+  .timeline-collapsed-item {
+    transition: none;
   }
 }
 
