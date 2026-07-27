@@ -1,4 +1,4 @@
-import { type App, Notice, PluginSettingTab, Setting, type SliderComponent, TextComponent } from 'obsidian';
+import { type App, Notice, PluginSettingTab, Setting, type SettingDefinitionItem, type SliderComponent, TextComponent } from 'obsidian';
 import type TimelinePlugin from './main';
 import { COLOR_PRESETS } from './constants';
 import { t } from './i18n';
@@ -93,11 +93,11 @@ export class TimelineSettingTab extends PluginSettingTab {
 			.setDesc(T.timelineColorDesc);
 
 		// Row 1: color preview circle + bare text input
-		const colorRow = colorSetting.controlEl.createEl('div', {
+		const colorRow = colorSetting.controlEl.createDiv({
 			cls: 'timeline-color-setting-container',
 		});
 
-		const colorPreview = colorRow.createEl('div', {
+		const colorPreview = colorRow.createDiv({
 			cls: 'timeline-color-preview',
 		});
 		colorPreview.style.backgroundColor = this.plugin.settings.timelineColor;
@@ -118,12 +118,12 @@ export class TimelineSettingTab extends PluginSettingTab {
 		});
 
 		// Row 2: preset color buttons
-		const presetsRow = colorSetting.controlEl.createEl('div', {
+		const presetsRow = colorSetting.controlEl.createDiv({
 			cls: 'timeline-color-presets-row',
 		});
 
 		for (const preset of COLOR_PRESETS) {
-			const presetButton = presetsRow.createEl('div', {
+			const presetButton = presetsRow.createDiv({
 				cls: 'timeline-preset-color',
 				attr: {
 					'data-color': preset.value,
@@ -165,7 +165,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 					return slider
 						.setLimits(0, 1000, 100)
 						.setValue(this.plugin.settings.tooltipDelay)
-						.setDynamicTooltip()
 						.onChange(async (value: number) => {
 							this.plugin.settings.tooltipDelay = value;
 							await this.plugin.saveSettings();
@@ -204,7 +203,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 					return slider
 						.setLimits(6, 20, 2)
 						.setValue(this.plugin.settings.dotSize)
-						.setDynamicTooltip()
 						.onChange(async (value: number) => {
 							this.plugin.settings.dotSize = value;
 							await this.plugin.saveSettings();
@@ -230,7 +228,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 					return slider
 						.setLimits(1, 5, 1)
 						.setValue(this.plugin.settings.lineWidth)
-						.setDynamicTooltip()
 						.onChange(async (value: number) => {
 							this.plugin.settings.lineWidth = value;
 							await this.plugin.saveSettings();
@@ -256,7 +253,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 					return slider
 						.setLimits(10, 40, 5)
 						.setValue(this.plugin.settings.itemSpacing)
-						.setDynamicTooltip()
 						.onChange(async (value: number) => {
 							this.plugin.settings.itemSpacing = value;
 							await this.plugin.saveSettings();
@@ -295,7 +291,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 					return slider
 						.setLimits(5, 50, 5)
 						.setValue(this.plugin.settings.collapseThreshold)
-						.setDynamicTooltip()
 						.onChange(async (value: number) => {
 							this.plugin.settings.collapseThreshold = value;
 							await this.plugin.saveSettings();
@@ -321,7 +316,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 					return slider
 						.setLimits(1, 15, 1)
 						.setValue(this.plugin.settings.collapseShowCount)
-						.setDynamicTooltip()
 						.onChange(async (value: number) => {
 							this.plugin.settings.collapseShowCount = value;
 							await this.plugin.saveSettings();
@@ -335,5 +329,121 @@ export class TimelineSettingTab extends PluginSettingTab {
 						new Notice(T.noticeShowCountRestored);
 					})
 				);
+	}
+
+	/**
+	 * Declarative settings for Obsidian 1.13.0+ settings search.
+	 * display() above still renders the custom UI (color presets,
+	 * restore-default buttons); these definitions mirror the simple
+	 * controls so they appear in settings search. Values bind directly
+	 * to plugin.settings via the default get/setControlValue.
+	 */
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		const T = t();
+		return [
+			{
+				name: T.sortDirection,
+				desc: T.sortDirectionDesc,
+				control: {
+					type: 'dropdown',
+					key: 'sortDirection',
+					options: {
+						asc: T.sortDirectionAscLabel,
+						desc: T.sortDirectionDescLabel,
+					},
+				},
+			},
+			{
+				name: T.datePropertyForNotes,
+				desc: T.datePropertyDesc,
+				control: { type: 'text', key: 'createdDateField' },
+			},
+			{
+				name: T.timelineColor,
+				desc: T.timelineColorDesc,
+				control: { type: 'color', key: 'timelineColor' },
+			},
+			{
+				name: T.dotSize,
+				desc: T.dotSizeDesc,
+				control: {
+					type: 'slider',
+					key: 'dotSize',
+					min: 6,
+					max: 20,
+					step: 2,
+				},
+			},
+			{
+				name: T.lineWidth,
+				desc: T.lineWidthDesc,
+				control: {
+					type: 'slider',
+					key: 'lineWidth',
+					min: 1,
+					max: 5,
+					step: 1,
+				},
+			},
+			{
+				name: T.eventSpacing,
+				desc: T.eventSpacingDesc,
+				control: {
+					type: 'slider',
+					key: 'itemSpacing',
+					min: 10,
+					max: 40,
+					step: 5,
+				},
+			},
+			{
+				name: T.hoverTooltip,
+				desc: T.hoverTooltipDesc,
+				control: { type: 'toggle', key: 'showTooltip' },
+			},
+			{
+				name: T.hoverDelay,
+				desc: T.hoverDelayDesc,
+				control: {
+					type: 'slider',
+					key: 'tooltipDelay',
+					min: 0,
+					max: 1000,
+					step: 100,
+				},
+			},
+			{
+				name: T.highlightToday,
+				desc: T.highlightTodayDesc,
+				control: { type: 'toggle', key: 'highlightToday' },
+			},
+			{
+				name: T.autoCollapse,
+				desc: T.autoCollapseDesc,
+				control: { type: 'toggle', key: 'autoCollapse' },
+			},
+			{
+				name: T.collapseThreshold,
+				desc: T.collapseThresholdDesc,
+				control: {
+					type: 'slider',
+					key: 'collapseThreshold',
+					min: 5,
+					max: 50,
+					step: 5,
+				},
+			},
+			{
+				name: T.showWhenCollapsed,
+				desc: T.showWhenCollapsedDesc,
+				control: {
+					type: 'slider',
+					key: 'collapseShowCount',
+					min: 1,
+					max: 15,
+					step: 1,
+				},
+			},
+		];
 	}
 }

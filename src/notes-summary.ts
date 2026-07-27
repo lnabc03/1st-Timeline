@@ -116,7 +116,7 @@ export class DateRangeModal extends Modal {
 
 		const paragraph = contentEl.createEl('p');
 		paragraph.appendText(T.modalDateRangePrompt);
-		paragraph.appendChild(activeDocument.createElement('br'));
+		paragraph.createEl('br');
 		paragraph.appendText(
 			T.modalTimelineNote(this.plugin.settings.createdDateField)
 		);

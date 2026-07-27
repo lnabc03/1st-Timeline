@@ -175,7 +175,7 @@ export async function processTimelineBlock(
 	}
 
 	// Container
-	const timelineContainer = el.createEl('div', {
+	const timelineContainer = el.createDiv({
 		cls: 'timeline-container',
 		attr: {
 			style: `--timeline-color: ${plugin.settings.timelineColor}; --dot-size: ${plugin.settings.dotSize}px; --line-width: ${plugin.settings.lineWidth}px; --item-spacing: ${plugin.settings.itemSpacing}px;`,
@@ -184,7 +184,7 @@ export async function processTimelineBlock(
 
 	// Source directive failed: show error, but still render inline events
 	if (sourceError) {
-		const errorEl = timelineContainer.createEl('div', {
+		const errorEl = timelineContainer.createDiv({
 			cls: 'timeline-error',
 		});
 		errorEl.createEl('strong', { text: T.timelineParseError });
@@ -194,7 +194,7 @@ export async function processTimelineBlock(
 	// Non-empty block with no events and no source error: show syntax error
 	if (events.length === 0 && source.trim() !== '' && !sourceError) {
 		timelineContainer.addClass('timeline-has-error');
-		const errorEl = timelineContainer.createEl('div', {
+		const errorEl = timelineContainer.createDiv({
 			cls: 'timeline-error',
 		});
 		errorEl.createEl('strong', { text: T.timelineParseError });
@@ -224,7 +224,7 @@ export async function processTimelineBlock(
 	today.setHours(0, 0, 0, 0);
 
 	for (const [eventIndex, event] of events.entries()) {
-		const timelineItem = timelineContainer.createEl('div', {
+		const timelineItem = timelineContainer.createDiv({
 			cls: 'timeline-item',
 		});
 		if (isCollapsed && !collapsedIndices.has(eventIndex)) {
@@ -255,13 +255,13 @@ export async function processTimelineBlock(
 			? `${dateDisplay}\n${timeDisplay}`
 			: dateDisplay;
 
-		timelineItem.createEl('div', {
+		timelineItem.createDiv({
 			cls: 'timeline-date',
 			text: displayDate,
 		});
-		timelineItem.createEl('div', { cls: 'timeline-dot' });
+		timelineItem.createDiv({ cls: 'timeline-dot' });
 
-		const contentEl = timelineItem.createEl('div', {
+		const contentEl = timelineItem.createDiv({
 			cls: 'timeline-content',
 		});
 
@@ -277,7 +277,7 @@ export async function processTimelineBlock(
 
 		// Hover tooltip
 		if (plugin.settings.showTooltip) {
-			const tooltipEl = contentEl.createEl('div', {
+			const tooltipEl = contentEl.createDiv({
 				cls: 'timeline-tooltip',
 			});
 
@@ -320,10 +320,10 @@ export async function processTimelineBlock(
 	if (isCollapsed) {
 		timelineContainer.addClass('timeline-collapsed');
 		const hiddenCount = events.length - collapsedIndices.size;
-		const collapseBar = timelineContainer.createEl('div', {
+		const collapseBar = timelineContainer.createDiv({
 			cls: 'timeline-collapse-bar',
 		});
-		const collapseGradient = collapseBar.createEl('div', {
+		const collapseGradient = collapseBar.createDiv({
 			cls: 'timeline-collapse-gradient',
 		});
 		const collapseBtn = collapseBar.createEl('button', {
