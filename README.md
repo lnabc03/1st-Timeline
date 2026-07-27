@@ -2,7 +2,7 @@
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **当前版本 (Current version)**: 1.4.8
+> **当前版本 (Current version)**: 1.5.2
 
 ---
 
@@ -78,6 +78,25 @@ npm run build
 | 英文冒号 | `:` | `2024-05-01:事件内容` |
 | 仅日期（多行） | 换行 | 日期独占一行，后续行为事件内容 |
 
+### 时间段（日期范围）
+
+除了时间点事件，还可以用 `日期A～日期B：内容` 表示一段有明确起止的时间（如实习、项目周期），渲染为时间轴上方的横向进度条：
+
+````markdown
+```timeline
+2026-07-01～2026-09-30：暑期实习
+2026年8月1日至2026年8月20日：项目冲刺
+2026-09-01~2026-09-10  双空格分隔也可以
+```
+````
+
+- 起止日期支持 `YYYY-MM-DD` 和 `YYYY年MM月DD日` 两种纯日期格式
+- 分隔符支持 `～`、`~`、`至`、`到` 四种写法
+- 状态自动计算：进行中显示「第 x/n 天」（开始当天为第 0 天），未开始显示「还有 x 天开始」，已结束显示「已结束 x 天」
+- 进度条颜色跟随时间轴颜色：未开始不填充，进行中按比例填充，已结束填满并降低透明度
+- 起止同一天时退化为普通时间点事件；开始晚于结束时自动交换
+- 自动折叠时只显示进行中的进度条；可在设置中关闭进度条区域
+
 ### 时间轴链接
 
 用 `source:` 指令引用另一个笔记中的时间轴，避免在日记模板里重复硬编码相同的事件：
@@ -99,6 +118,7 @@ source: [[工作安排]]
 在包含时间轴的笔记中执行命令面板的 **"归档过期事件 / Archive past events"** 命令：
 
 - 当前文件所有 ` ```timeline ` 代码块中，日期早于今天的事件会被移出代码块
+- 时间段以结束日期判断：已结束的时间段会被归档，进行中/未开始的保留
 - 过期事件追加到同文件的「已归档：」区域（纯文本保留原始格式）；区域不存在时在文件末尾自动创建
 - 重复执行时识别已有归档区并追加，今天及未来的事件保留在块内
 
@@ -129,6 +149,7 @@ source: [[工作安排]]
 | 自动折叠 | 事件过多时自动折叠 | 开启 | 开关 |
 | 折叠阈值 | 触发折叠的事件数量 | 10 | 5–50 |
 | 折叠时显示数量 | 折叠后显示的事件数 | 5 | 1–15 |
+| 时间段进度条 | 在时间轴上方显示日期范围的进度条 | 开启 | 开关 |
 
 ---
 
@@ -152,6 +173,12 @@ npm run lint         # ESLint 代码检查
 ---
 
 ## 更新日志
+
+### 1.5.x — 时间段与生态完善 (2026-07)
+
+- 新增时间段（日期范围）语法 `日期A～日期B：内容`，渲染为时间轴上方的进度条，自动计算第 x/n 天
+- 新增 `source:` 指令引用其他笔记的时间轴、归档过期事件命令
+- 通过社区插件审核，适配 Obsidian 1.13.0+ 设置搜索
 
 ### 1.4.x — 正式版发布 (2026-06)
 
@@ -198,7 +225,7 @@ npm run lint         # ESLint 代码检查
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **Current version**: 1.4.8
+> **Current version**: 1.5.2
 
 ## Description
 
@@ -268,6 +295,25 @@ A new year begins! (multi-line text)
 | English colon | `:` | `2024-05-01: Event content` |
 | Date only (multi-line) | Newline | Date on one line, content on following lines |
 
+### Date Ranges
+
+Beyond point-in-time events, use `DateA～DateB: content` for a span with explicit start and end (e.g. an internship or project phase), rendered as horizontal progress bars above the timeline:
+
+````markdown
+```timeline
+2026-07-01～2026-09-30: Summer internship
+2026年8月1日至2026年8月20日：Project sprint
+2026-09-01~2026-09-10  Two-space separator works too
+```
+````
+
+- Start and end accept pure dates only: `YYYY-MM-DD` or `YYYY年MM月DD日`
+- Four separators are recognized: `～`, `~`, `至`, `到`
+- Status is computed automatically: "Day x/n" while active (day 0 on the start date), "Starts in x days" when upcoming, "Ended x days ago" when over
+- Bar color follows the timeline color: empty when upcoming, proportional fill while active, full but dimmed when ended
+- Identical start and end degrades to a normal point event; a start later than the end is swapped automatically
+- When collapsed, only active bars are shown; the progress bar area can be disabled in settings
+
 ### Timeline Source
 
 Use the `source:` directive to render a timeline stored in another note, avoiding hardcoded duplicates in daily note templates:
@@ -289,6 +335,7 @@ source: [[Work Schedule]]
 Run the **"Archive past events / 归档过期事件"** command from the command palette in a note containing timelines:
 
 - Events dated before today are moved out of every ` ```timeline ` code block in the current file
+- Date ranges are judged by their end date: ended ranges are archived, active/upcoming ones stay
 - Archived events are appended to an "Archived:" section in the same file (kept as plain text in original format); the section is created at the end of the file if absent
 - Running the command again appends to the existing section; today's and future events stay in the block
 
@@ -317,6 +364,7 @@ Use the command palette (`Ctrl+P`) and run the **"Notes summary / 笔记汇总"*
 | Auto collapse | Auto-collapse when above threshold | On | Toggle |
 | Collapse threshold | Events needed to trigger collapse | 10 | 5–50 |
 | Show when collapsed | Events shown when collapsed | 5 | 1–15 |
+| Range progress bars | Progress bars for date ranges above the timeline | On | Toggle |
 
 ## Development
 
@@ -336,6 +384,12 @@ npm run lint         # ESLint check
 - **Minimum Obsidian version**: 1.8.7 (desktop and mobile)
 
 ## Changelog
+
+### 1.5.x — Date Ranges & Ecosystem (2026-07)
+
+- Added date range syntax `DateA～DateB: content`, rendered as progress bars above the timeline with automatic day x/n tracking
+- Added the `source:` directive for referencing timelines in other notes, and the archive past events command
+- Passed community plugin review; compatible with Obsidian 1.13.0+ settings search
 
 ### 1.4.x — Official Release (2026-06)
 

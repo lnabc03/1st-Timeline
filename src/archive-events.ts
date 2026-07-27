@@ -1,7 +1,7 @@
 import { Notice } from 'obsidian';
 import type TimelinePlugin from './main';
 import { SINGLE_LINE_REGEX } from './constants';
-import { parseDateTime } from './date-parser';
+import { parseDateRangeLine, parseDateTime } from './date-parser';
 import { SOURCE_DIRECTIVE_REGEX } from './timeline-source';
 import { t } from './i18n';
 
@@ -30,14 +30,24 @@ function splitSegments(blockText: string): Segment[] {
 
 		let date: Date | null = null;
 		if (trimmed !== '' && !SOURCE_DIRECTIVE_REGEX.test(trimmed)) {
-			const singleLineMatch = trimmed.match(SINGLE_LINE_REGEX);
-			if (singleLineMatch) {
-				const parsed = parseDateTime(singleLineMatch[1]!.trim());
-				if (parsed) date = parsed.date;
+			// 时间段语法优先：以结束日期判断是否过期（进行中/未开始保留）
+			const range = parseDateRangeLine(trimmed);
+			if (range) {
+				date =
+					range.start.getTime() === range.end.getTime()
+						? range.start
+						: range.end;
 			}
 			if (!date) {
-				const parsed = parseDateTime(trimmed);
-				if (parsed) date = parsed.date;
+				const singleLineMatch = trimmed.match(SINGLE_LINE_REGEX);
+				if (singleLineMatch) {
+					const parsed = parseDateTime(singleLineMatch[1]!.trim());
+					if (parsed) date = parsed.date;
+				}
+				if (!date) {
+					const parsed = parseDateTime(trimmed);
+					if (parsed) date = parsed.date;
+				}
 			}
 		}
 

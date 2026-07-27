@@ -1,7 +1,7 @@
 import { Component, MarkdownRenderer, type MarkdownPostProcessorContext } from 'obsidian';
 import type TimelinePlugin from './main';
 import { SINGLE_LINE_REGEX } from './constants';
-import { parseDateTime } from './date-parser';
+import { formatISODate, parseDateRangeLine, parseDateTime } from './date-parser';
 import {
 	findSourceDirective,
 	loadSourceText,
@@ -16,17 +16,38 @@ interface TimelineEvent {
 	content: string;
 }
 
+interface TimelineRange {
+	start: Date;
+	end: Date;
+	display: string;
+	title: string;
+}
+
 /**
  * Parses timeline events from code block text.
  * Source directive lines are skipped, so nested directives in
  * referenced files are silently ignored.
  */
-function parseEvents(source: string): TimelineEvent[] {
+function parseEvents(source: string): {
+	events: TimelineEvent[];
+	ranges: TimelineRange[];
+} {
 	const events: TimelineEvent[] = [];
+	const ranges: TimelineRange[] = [];
 	const lines = source.split('\n');
 
 	let currentEvent: TimelineEvent | null = null;
 	let currentContent: string[] = [];
+
+	const flushCurrentEvent = () => {
+		if (currentEvent) {
+			currentEvent.content = currentContent.join('\n').trim();
+			if (currentEvent.content) {
+				events.push(currentEvent);
+			}
+			currentEvent = null;
+		}
+	};
 
 	for (const line of lines) {
 		const trimmedLine = line.trim();
@@ -39,6 +60,24 @@ function parseEvents(source: string): TimelineEvent[] {
 		}
 
 		if (parseSourceDirective(trimmedLine) !== null) {
+			continue;
+		}
+
+		// 时间段语法优先于单行语法（「至/到」可能被误认为中文时间词）
+		const range = parseDateRangeLine(trimmedLine);
+		if (range) {
+			flushCurrentEvent();
+			if (range.start.getTime() === range.end.getTime()) {
+				// A = B：退化为普通时间点事件
+				events.push({
+					date: range.start,
+					displayDate: formatISODate(range.start),
+					originalDate: formatISODate(range.start),
+					content: range.title,
+				});
+			} else {
+				ranges.push(range);
+			}
 			continue;
 		}
 
@@ -64,12 +103,7 @@ function parseEvents(source: string): TimelineEvent[] {
 		}
 
 		if (dateMatch) {
-			if (currentEvent) {
-				currentEvent.content = currentContent.join('\n').trim();
-				if (currentEvent.content) {
-					events.push(currentEvent);
-				}
-			}
+			flushCurrentEvent();
 
 			const parsed = parseDateTime(dateTimeStr)!;
 			currentEvent = {
@@ -84,14 +118,9 @@ function parseEvents(source: string): TimelineEvent[] {
 		}
 	}
 
-	if (currentEvent) {
-		currentEvent.content = currentContent.join('\n').trim();
-		if (currentEvent.content) {
-			events.push(currentEvent);
-		}
-	}
+	flushCurrentEvent();
 
-	return events;
+	return { events, ranges };
 }
 
 /**
@@ -114,6 +143,57 @@ function mergeEvents(
 }
 
 /**
+ * Merges inline and referenced ranges, deduplicating entries with
+ * identical start, end and title. Inline ranges win over sourced ones.
+ */
+function mergeRanges(
+	inlineRanges: TimelineRange[],
+	sourcedRanges: TimelineRange[]
+): TimelineRange[] {
+	const seen = new Set<string>();
+	const merged: TimelineRange[] = [];
+	for (const range of [...inlineRanges, ...sourcedRanges]) {
+		const key = `${range.start.getTime()}\n${range.end.getTime()}\n${range.title}`;
+		if (seen.has(key)) continue;
+		seen.add(key);
+		merged.push(range);
+	}
+	return merged;
+}
+
+/**
+ * Attaches the shared hover tooltip (same style and delay as event
+ * cards) to an element. Used by both timeline events and range items
+ * so hover feedback is consistent across the whole block.
+ */
+function attachHoverTooltip(
+	plugin: TimelinePlugin,
+	el: HTMLElement,
+	text: string
+): void {
+	if (!plugin.settings.showTooltip) return;
+
+	const tooltipEl = el.createDiv({ cls: 'timeline-tooltip' });
+	tooltipEl.setText(text);
+
+	let hoverTimer: number | null = null;
+
+	plugin.registerDomEvent(el, 'mouseenter', () => {
+		hoverTimer = window.setTimeout(() => {
+			tooltipEl.addClass('visible');
+		}, plugin.settings.tooltipDelay);
+	});
+
+	plugin.registerDomEvent(el, 'mouseleave', () => {
+		if (hoverTimer !== null) {
+			window.clearTimeout(hoverTimer);
+			hoverTimer = null;
+		}
+		tooltipEl.removeClass('visible');
+	});
+}
+
+/**
  * Parses and renders a timeline code block.
  * Called by the code block processor callback in main.ts.
  */
@@ -124,7 +204,9 @@ export async function processTimelineBlock(
 	plugin: TimelinePlugin
 ): Promise<void> {
 	const T = t();
-	let events = parseEvents(source);
+	const parsed = parseEvents(source);
+	let events = parsed.events;
+	let ranges = parsed.ranges;
 	let sourceError: string | null = null;
 
 	// Source directive: merge events from a referenced file
@@ -136,7 +218,9 @@ export async function processTimelineBlock(
 			ctx.sourcePath
 		);
 		if (result.ok) {
-			events = mergeEvents(events, parseEvents(result.text));
+			const sourced = parseEvents(result.text);
+			events = mergeEvents(events, sourced.events);
+			ranges = mergeRanges(ranges, sourced.ranges);
 		} else if (result.reason === 'not-found') {
 			sourceError = T.sourceFileNotFound(result.link);
 		} else {
@@ -149,6 +233,9 @@ export async function processTimelineBlock(
 		const direction = plugin.settings.sortDirection === 'asc' ? 1 : -1;
 		return direction * (a.date.getTime() - b.date.getTime());
 	});
+
+	// Ranges always sort ascending by start date
+	ranges.sort((a, b) => a.start.getTime() - b.start.getTime());
 
 	// Auto collapse
 	let collapsedIndices = new Set<number>();
@@ -174,6 +261,91 @@ export async function processTimelineBlock(
 		isCollapsed = collapsedIndices.size < events.length;
 	}
 
+	// Source directive failed: show error above the timeline,
+	// outside the container so the vertical line can't cross it
+	if (sourceError) {
+		const errorEl = el.createDiv({ cls: 'timeline-error' });
+		errorEl.createEl('strong', { text: T.timelineParseError });
+		errorEl.createEl('p', { text: sourceError });
+	}
+
+	// Render date-range progress bars above the timeline
+	const DAY_MS = 1000 * 60 * 60 * 24;
+	const todayStart = new Date();
+	todayStart.setHours(0, 0, 0, 0);
+
+	let rangesEl: HTMLElement | null = null;
+	if (plugin.settings.showRangeBars && ranges.length > 0) {
+		rangesEl = el.createDiv({
+			cls: 'timeline-ranges',
+			attr: {
+				style: `--timeline-color: ${plugin.settings.timelineColor}; --range-delay: ${plugin.settings.tooltipDelay}ms;`,
+			},
+		});
+		if (isCollapsed) {
+			rangesEl.addClass('timeline-ranges-collapsed');
+		}
+
+		for (const range of ranges) {
+			const startDay = new Date(range.start);
+			startDay.setHours(0, 0, 0, 0);
+			const endDay = new Date(range.end);
+			endDay.setHours(0, 0, 0, 0);
+			const totalDays = Math.round(
+				(endDay.getTime() - startDay.getTime()) / DAY_MS
+			);
+
+			let statusCls: string;
+			let statusText: string;
+			let percent: number;
+			if (todayStart.getTime() < startDay.getTime()) {
+				statusCls = 'timeline-range-upcoming';
+				statusText = T.rangeStartsIn(
+					Math.round(
+						(startDay.getTime() - todayStart.getTime()) / DAY_MS
+					)
+				);
+				percent = 0;
+			} else if (todayStart.getTime() > endDay.getTime()) {
+				statusCls = 'timeline-range-ended';
+				statusText = T.rangeEndedAgo(
+					Math.round(
+						(todayStart.getTime() - endDay.getTime()) / DAY_MS
+					)
+				);
+				percent = 100;
+			} else {
+				statusCls = 'timeline-range-active';
+				const elapsed = Math.round(
+					(todayStart.getTime() - startDay.getTime()) / DAY_MS
+				);
+				statusText = T.rangeDayProgress(elapsed, totalDays);
+				percent =
+					totalDays === 0 ? 100 : (elapsed / totalDays) * 100;
+			}
+
+			const item = rangesEl.createDiv({
+				cls: `timeline-range-item ${statusCls}`,
+			});
+			const header = item.createDiv({ cls: 'timeline-range-header' });
+			header.createSpan({
+				cls: 'timeline-range-title',
+				text: range.title,
+			});
+			header.createSpan({
+				cls: 'timeline-range-status',
+				text: statusText,
+			});
+			const track = item.createDiv({ cls: 'timeline-range-track' });
+			track.createDiv({
+				cls: 'timeline-range-fill',
+				attr: { style: `width: ${percent}%;` },
+			});
+
+			attachHoverTooltip(plugin, item, range.display);
+		}
+	}
+
 	// Container
 	const timelineContainer = el.createDiv({
 		cls: 'timeline-container',
@@ -182,17 +354,13 @@ export async function processTimelineBlock(
 		},
 	});
 
-	// Source directive failed: show error, but still render inline events
-	if (sourceError) {
-		const errorEl = timelineContainer.createDiv({
-			cls: 'timeline-error',
-		});
-		errorEl.createEl('strong', { text: T.timelineParseError });
-		errorEl.createEl('p', { text: sourceError });
-	}
-
 	// Non-empty block with no events and no source error: show syntax error
-	if (events.length === 0 && source.trim() !== '' && !sourceError) {
+	if (
+		events.length === 0 &&
+		ranges.length === 0 &&
+		source.trim() !== '' &&
+		!sourceError
+	) {
 		timelineContainer.addClass('timeline-has-error');
 		const errorEl = timelineContainer.createDiv({
 			cls: 'timeline-error',
@@ -275,36 +443,16 @@ export async function processTimelineBlock(
 			contentEl.dataset.todayLabel = TR.todayLabel;
 		}
 
-		// Hover tooltip
-		if (plugin.settings.showTooltip) {
-			const tooltipEl = contentEl.createDiv({
-				cls: 'timeline-tooltip',
-			});
-
-			if (daysDiff === 0) {
-				tooltipEl.setText(TR.tooltipToday);
-			} else if (daysDiff > 0) {
-				tooltipEl.setText(TR.tooltipDaysFromNow(daysDiff));
-			} else {
-				tooltipEl.setText(TR.tooltipDaysAgo(Math.abs(daysDiff)));
-			}
-
-			let hoverTimer: number | null = null;
-
-			plugin.registerDomEvent(contentEl, 'mouseenter', () => {
-				hoverTimer = window.setTimeout(() => {
-					tooltipEl.addClass('visible');
-				}, plugin.settings.tooltipDelay);
-			});
-
-			plugin.registerDomEvent(contentEl, 'mouseleave', () => {
-				if (hoverTimer !== null) {
-					window.clearTimeout(hoverTimer);
-					hoverTimer = null;
-				}
-				tooltipEl.removeClass('visible');
-			});
+		// Hover tooltip (shared with range items)
+		let tooltipText: string;
+		if (daysDiff === 0) {
+			tooltipText = TR.tooltipToday;
+		} else if (daysDiff > 0) {
+			tooltipText = TR.tooltipDaysFromNow(daysDiff);
+		} else {
+			tooltipText = TR.tooltipDaysAgo(Math.abs(daysDiff));
 		}
+		attachHoverTooltip(plugin, contentEl, tooltipText);
 
 		// Render Markdown content
 		void MarkdownRenderer.render(
@@ -334,6 +482,7 @@ export async function processTimelineBlock(
 		let expanded = false;
 		plugin.registerDomEvent(collapseBtn, 'click', () => {
 			expanded = !expanded;
+			rangesEl?.toggleClass('timeline-ranges-collapsed', !expanded);
 			if (expanded) {
 				timelineContainer.removeClass('timeline-collapsed');
 				collapseBtn.setText(TR.collapseCollapse);
