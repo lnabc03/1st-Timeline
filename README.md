@@ -8,7 +8,7 @@
 
 ## 简介
 
-1st Timeline 是一个 Obsidian 插件，可将简单的文本代码块渲染为精美的时间轴视图。支持多种日期格式（含中文日期优先支持），智能日期解析，优雅的视觉呈现——帮助您轻松创建时间线、项目进度视图或历史事件记录。
+1st Timeline 是一个 Obsidian 插件，可将简单的文本代码块渲染为精美的时间轴视图。支持多种日期格式（含中文日期优先支持），智能日期解析，优雅的视觉呈现——帮助您轻松创建时间线、项目进度视图或日程规划记录。
 
 > 1st Timeline renders beautiful timeline views from simple text code blocks. It supports multiple date formats with first-class Chinese date support, intelligent parsing, and elegant visual presentation.
 
@@ -229,7 +229,7 @@ npm run lint         # ESLint 代码检查
 
 ## Description
 
-1st Timeline renders beautiful timeline views from simple text code blocks. It supports multiple date formats with first-class Chinese date support, intelligent parsing, and elegant visual presentation — helping you create timelines, project progress views, or historical event records effortlessly.
+1st Timeline renders beautiful timeline views from simple text code blocks. It supports multiple date formats with first-class Chinese date support, intelligent parsing, and elegant visual presentation — helping you create timelines, project progress views, or schedule records effortlessly.
 
 > 1st Timeline 是一个 Obsidian 插件，可将简单的文本代码块渲染为精美的时间轴视图。
 
