@@ -14,6 +14,8 @@ interface TimelineEvent {
 	displayDate: string;
 	originalDate: string;
 	content: string;
+	/** 时间段端点标记：由 range 的起止日期自动生成的节点 */
+	kind?: 'range-start' | 'range-end';
 }
 
 interface TimelineRange {
@@ -230,26 +232,46 @@ export async function processTimelineBlock(
 
 	// Mark each range's start/end on the timeline itself so the
 	// progress bars above correspond to visible event nodes
-	for (const range of ranges) {
-		events.push(
-			{
-				date: range.start,
-				displayDate: formatISODate(range.start),
-				originalDate: formatISODate(range.start),
-				content: T.rangeStartEvent(range.title),
-			},
-			{
-				date: range.end,
-				displayDate: formatISODate(range.end),
-				originalDate: formatISODate(range.end),
-				content: T.rangeEndEvent(range.title),
-			}
-		);
+	// (可由“时间段端点标记”设置关闭)
+	if (plugin.settings.showRangeEndpoints) {
+		for (const range of ranges) {
+			events.push(
+				{
+					date: range.start,
+					displayDate: formatISODate(range.start),
+					originalDate: formatISODate(range.start),
+					content: T.rangeStartEvent(range.title),
+					kind: 'range-start',
+				},
+				{
+					date: range.end,
+					displayDate: formatISODate(range.end),
+					originalDate: formatISODate(range.end),
+					content: T.rangeEndEvent(range.title),
+					kind: 'range-end',
+				}
+			);
+		}
 	}
 
-	// Sort events
+	// Sort events.
+	// 同日排序规则：端点事件要“包含”所有同日事件 ——
+	// 开始分隔线排在当日所有事件之前，结束分隔线排在之后；
+	// 普通事件之间仍按具体时间排序。降序时整体镜像，
+	// 保证自上而下阅读时时间段始终包住当日事件。
+	const dayTime = (d: Date): number => {
+		const t = new Date(d);
+		t.setHours(0, 0, 0, 0);
+		return t.getTime();
+	};
+	const kindOrder = (kind?: 'range-start' | 'range-end'): number =>
+		kind === 'range-start' ? -1 : kind === 'range-end' ? 1 : 0;
 	events.sort((a, b) => {
 		const direction = plugin.settings.sortDirection === 'asc' ? 1 : -1;
+		const dayDiff = dayTime(a.date) - dayTime(b.date);
+		if (dayDiff !== 0) return direction * dayDiff;
+		const kindDiff = kindOrder(a.kind) - kindOrder(b.kind);
+		if (kindDiff !== 0) return direction * kindDiff;
 		return direction * (a.date.getTime() - b.date.getTime());
 	});
 
@@ -421,6 +443,10 @@ export async function processTimelineBlock(
 		const timelineItem = timelineContainer.createDiv({
 			cls: 'timeline-item',
 		});
+		if (event.kind) {
+			// 时间段端点：timeline-range-start / timeline-range-end
+			timelineItem.addClass(`timeline-${event.kind}`);
+		}
 		if (isCollapsed && !collapsedIndices.has(eventIndex)) {
 			timelineItem.addClass('timeline-collapsed-item');
 		}
@@ -464,7 +490,8 @@ export async function processTimelineBlock(
 		const timeDiff = eventDate.getTime() - today.getTime();
 		const daysDiff = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
 
-		if (daysDiff === 0 && plugin.settings.highlightToday) {
+		// 端点节点是分隔线而非卡片，不套用今天高亮（悬浮提示仍会显示“今天”）
+		if (daysDiff === 0 && plugin.settings.highlightToday && !event.kind) {
 			contentEl.addClass('timeline-today');
 			contentEl.dataset.todayLabel = TR.todayLabel;
 		}

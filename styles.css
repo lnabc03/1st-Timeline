@@ -472,6 +472,83 @@
   background: var(--background-modifier-form-field);
 }
 
+/* ==============================================
+   时间段端点事件（开始/结束标记）
+   观感定位：横贯内容区的一道主题色分隔线，而非普通
+   事件卡片。文字居中，线从文字两端向两侧延伸并渐隐。
+   本区块置于暗色主题覆盖之后，确保透明背景不被
+   .theme-dark .timeline-content 顶掉。
+   ============================================== */
+
+/* --- 端点本体：透明背景 flex 行 —— 线 + 居中文字 + 线 --- */
+.timeline-range-start .timeline-content,
+.timeline-range-end .timeline-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 2px 0;
+  margin-right: 0;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  /* 文字样式与时间段进度条标题（.timeline-range-title）一致 */
+  color: var(--text-normal);
+  font-size: 0.88em;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: color 0.25s ease;
+}
+
+/* 左右两段分隔线：覆盖卡片小箭头，由文字向两端延伸并渐隐 */
+.timeline-range-start .timeline-content::before,
+.timeline-range-end .timeline-content::before,
+.timeline-range-start .timeline-content::after,
+.timeline-range-end .timeline-content::after {
+  content: '';
+  position: static;
+  flex: 1;
+  height: 2px;
+  border: none;
+  border-radius: 1px;
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+
+.timeline-range-start .timeline-content::before,
+.timeline-range-end .timeline-content::before {
+  background: linear-gradient(to right, transparent, var(--timeline-color));
+}
+
+.timeline-range-start .timeline-content::after,
+.timeline-range-end .timeline-content::after {
+  background: linear-gradient(to left, transparent, var(--timeline-color));
+}
+
+/* MarkdownRenderer 会包一层 <p>，去掉边距并强制单行省略 */
+.timeline-range-start .timeline-content p,
+.timeline-range-end .timeline-content p {
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 悬停：线条提亮、文字着主题色；不上浮、不加阴影，保持分隔线的平直观感 */
+.timeline-range-start .timeline-content:hover,
+.timeline-range-end .timeline-content:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: transparent;
+  color: var(--timeline-color);
+}
+
+.timeline-range-start .timeline-content:hover::before,
+.timeline-range-end .timeline-content:hover::before,
+.timeline-range-start .timeline-content:hover::after,
+.timeline-range-end .timeline-content:hover::after {
+  opacity: 0.95;
+}
+
 /* --- 错误提示样式 --- */
 .timeline-error {
   padding: 12px 16px;

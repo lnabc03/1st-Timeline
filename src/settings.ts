@@ -12,6 +12,7 @@ export interface TimelinePluginSettings {
 	showTooltip: boolean;
 	tooltipDelay: number;
 	highlightToday: boolean;
+	showRangeEndpoints: boolean;
 	createdDateField: string;
 	autoCollapse: boolean;
 	collapseThreshold: number;
@@ -27,6 +28,7 @@ export const DEFAULT_SETTINGS: TimelinePluginSettings = {
 	showTooltip: true,
 	tooltipDelay: 500,
 	highlightToday: true,
+	showRangeEndpoints: true,
 	createdDateField: 'created',
 	autoCollapse: true,
 	collapseThreshold: 10,
@@ -188,6 +190,19 @@ export class TimelineSettingTab extends PluginSettingTab {
 						.setValue(this.plugin.settings.highlightToday)
 						.onChange(async (value: boolean) => {
 							this.plugin.settings.highlightToday = value;
+							await this.plugin.saveSettings();
+						})
+				);
+
+			// Range start/end markers
+			new Setting(containerEl)
+				.setName(T.showRangeEndpoints)
+				.setDesc(T.showRangeEndpointsDesc)
+				.addToggle((toggle) =>
+					toggle
+						.setValue(this.plugin.settings.showRangeEndpoints)
+						.onChange(async (value: boolean) => {
+							this.plugin.settings.showRangeEndpoints = value;
 							await this.plugin.saveSettings();
 						})
 				);
@@ -416,6 +431,11 @@ export class TimelineSettingTab extends PluginSettingTab {
 				name: T.highlightToday,
 				desc: T.highlightTodayDesc,
 				control: { type: 'toggle', key: 'highlightToday' },
+			},
+			{
+				name: T.showRangeEndpoints,
+				desc: T.showRangeEndpointsDesc,
+				control: { type: 'toggle', key: 'showRangeEndpoints' },
 			},
 			{
 				name: T.autoCollapse,

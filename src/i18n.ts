@@ -25,6 +25,8 @@ export interface Locale {
 	noticeHoverDelayRestored: string;
 	highlightToday: string;
 	highlightTodayDesc: string;
+	showRangeEndpoints: string;
+	showRangeEndpointsDesc: string;
 	dotSize: string;
 	dotSizeDesc: string;
 	noticeDotSizeRestored: string;
@@ -118,6 +120,9 @@ const EN: Locale = {
 	noticeHoverDelayRestored: 'Default hover delay restored',
 	highlightToday: 'Highlight today',
 	highlightTodayDesc: 'Highlight events on the current day',
+	showRangeEndpoints: 'Range start/end markers',
+	showRangeEndpointsDesc:
+		'Show date-range start and end as divider lines on the timeline',
 	dotSize: 'Dot size',
 	dotSizeDesc: 'Size of timeline dots',
 	noticeDotSizeRestored: 'Default dot size restored',
@@ -209,6 +214,8 @@ const ZH: Locale = {
 	noticeHoverDelayRestored: '已恢复默认悬停延迟',
 	highlightToday: '当天事件高亮',
 	highlightTodayDesc: '高亮显示当天的事件',
+	showRangeEndpoints: '时间段端点标记',
+	showRangeEndpointsDesc: '在时间轴中以分隔线显示时间段的开始和结束',
 	dotSize: '时间点大小',
 	dotSizeDesc: '时间轴上点的大小',
 	noticeDotSizeRestored: '已恢复默认点大小',
