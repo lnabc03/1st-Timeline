@@ -42,8 +42,6 @@ export interface Locale {
 	showWhenCollapsed: string;
 	showWhenCollapsedDesc: string;
 	noticeShowCountRestored: string;
-	showRangeBars: string;
-	showRangeBarsDesc: string;
 
 	// Command
 	commandNotesSummary: string;
@@ -72,6 +70,8 @@ export interface Locale {
 	rangeDayProgress: (elapsed: number, total: number) => string;
 	rangeStartsIn: (days: number) => string;
 	rangeEndedAgo: (days: number) => string;
+	rangeStartEvent: (title: string) => string;
+	rangeEndEvent: (title: string) => string;
 
 	// Collapse button
 	collapseShowAll: (count: number) => string;
@@ -136,8 +136,6 @@ const EN: Locale = {
 	showWhenCollapsed: 'Show when collapsed',
 	showWhenCollapsedDesc: 'Number of events to show when collapsed',
 	noticeShowCountRestored: 'Default show count restored',
-	showRangeBars: 'Range progress bars',
-	showRangeBarsDesc: 'Show progress bars for date ranges above the timeline',
 
 	commandNotesSummary: 'Notes summary',
 	commandArchivePastEvents: 'Archive past events',
@@ -162,6 +160,8 @@ const EN: Locale = {
 		`Day ${elapsed}/${total}`,
 	rangeStartsIn: (days: number) => `Starts in ${days} days`,
 	rangeEndedAgo: (days: number) => `Ended ${days} days ago`,
+	rangeStartEvent: (title: string) => `${title} (Start)`,
+	rangeEndEvent: (title: string) => `${title} (End)`,
 
 	collapseShowAll: (count: number) => `Show all (+${count})`,
 	collapseCollapse: 'Collapse',
@@ -227,8 +227,6 @@ const ZH: Locale = {
 	showWhenCollapsed: '折叠时显示数量',
 	showWhenCollapsedDesc: '折叠后显示的事件数量',
 	noticeShowCountRestored: '已恢复默认显示数量',
-	showRangeBars: '时间段进度条',
-	showRangeBarsDesc: '在时间轴上方显示日期范围（时间段）的进度条',
 
 	commandNotesSummary: '笔记汇总',
 	commandArchivePastEvents: '归档过期事件',
@@ -253,6 +251,8 @@ const ZH: Locale = {
 		`第 ${elapsed}/${total} 天`,
 	rangeStartsIn: (days: number) => `还有 ${days} 天开始`,
 	rangeEndedAgo: (days: number) => `已结束 ${days} 天`,
+	rangeStartEvent: (title: string) => `${title}（开始）`,
+	rangeEndEvent: (title: string) => `${title}（结束）`,
 
 	collapseShowAll: (count: number) => `显示全部 (+${count})`,
 	collapseCollapse: '折叠',

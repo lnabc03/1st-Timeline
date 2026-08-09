@@ -16,7 +16,6 @@ export interface TimelinePluginSettings {
 	autoCollapse: boolean;
 	collapseThreshold: number;
 	collapseShowCount: number;
-	showRangeBars: boolean;
 }
 
 export const DEFAULT_SETTINGS: TimelinePluginSettings = {
@@ -32,7 +31,6 @@ export const DEFAULT_SETTINGS: TimelinePluginSettings = {
 	autoCollapse: true,
 	collapseThreshold: 10,
 	collapseShowCount: 5,
-	showRangeBars: true,
 };
 
 export class TimelineSettingTab extends PluginSettingTab {
@@ -190,19 +188,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 						.setValue(this.plugin.settings.highlightToday)
 						.onChange(async (value: boolean) => {
 							this.plugin.settings.highlightToday = value;
-							await this.plugin.saveSettings();
-						})
-				);
-
-			// Range progress bars
-			new Setting(containerEl)
-				.setName(T.showRangeBars)
-				.setDesc(T.showRangeBarsDesc)
-				.addToggle((toggle) =>
-					toggle
-						.setValue(this.plugin.settings.showRangeBars)
-						.onChange(async (value: boolean) => {
-							this.plugin.settings.showRangeBars = value;
 							await this.plugin.saveSettings();
 						})
 				);
@@ -431,11 +416,6 @@ export class TimelineSettingTab extends PluginSettingTab {
 				name: T.highlightToday,
 				desc: T.highlightTodayDesc,
 				control: { type: 'toggle', key: 'highlightToday' },
-			},
-			{
-				name: T.showRangeBars,
-				desc: T.showRangeBarsDesc,
-				control: { type: 'toggle', key: 'showRangeBars' },
 			},
 			{
 				name: T.autoCollapse,

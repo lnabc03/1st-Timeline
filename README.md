@@ -95,7 +95,8 @@ npm run build
 - 状态自动计算：进行中显示「第 x/n 天」（开始当天为第 0 天），未开始显示「还有 x 天开始」，已结束显示「已结束 x 天」
 - 进度条颜色跟随时间轴颜色：未开始不填充，进行中按比例填充，已结束填满并降低透明度
 - 起止同一天时退化为普通时间点事件；开始晚于结束时自动交换
-- 自动折叠时只显示进行中的进度条；可在设置中关闭进度条区域
+- 时间段的开始日和结束日会同时作为事件节点（「标题（开始）」「标题（结束）」）渲染在时间轴上，与进度条一一对应
+- 自动折叠时只显示进行中的进度条
 
 ### 时间轴链接
 
@@ -149,7 +150,6 @@ source: [[工作安排]]
 | 自动折叠 | 事件过多时自动折叠 | 开启 | 开关 |
 | 折叠阈值 | 触发折叠的事件数量 | 10 | 5–50 |
 | 折叠时显示数量 | 折叠后显示的事件数 | 5 | 1–15 |
-| 时间段进度条 | 在时间轴上方显示日期范围的进度条 | 开启 | 开关 |
 
 ---
 
@@ -312,7 +312,8 @@ Beyond point-in-time events, use `DateA～DateB: content` for a span with explic
 - Status is computed automatically: "Day x/n" while active (day 0 on the start date), "Starts in x days" when upcoming, "Ended x days ago" when over
 - Bar color follows the timeline color: empty when upcoming, proportional fill while active, full but dimmed when ended
 - Identical start and end degrades to a normal point event; a start later than the end is swapped automatically
-- When collapsed, only active bars are shown; the progress bar area can be disabled in settings
+- Each range's start and end dates also appear as event nodes on the timeline ("Title (Start)" / "Title (End)"), matching the progress bars one-to-one
+- When collapsed, only active bars are shown
 
 ### Timeline Source
 
@@ -364,7 +365,6 @@ Use the command palette (`Ctrl+P`) and run the **"Notes summary / 笔记汇总"*
 | Auto collapse | Auto-collapse when above threshold | On | Toggle |
 | Collapse threshold | Events needed to trigger collapse | 10 | 5–50 |
 | Show when collapsed | Events shown when collapsed | 5 | 1–15 |
-| Range progress bars | Progress bars for date ranges above the timeline | On | Toggle |
 
 ## Development
 

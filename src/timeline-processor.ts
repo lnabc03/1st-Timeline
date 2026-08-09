@@ -228,6 +228,25 @@ export async function processTimelineBlock(
 		}
 	}
 
+	// Mark each range's start/end on the timeline itself so the
+	// progress bars above correspond to visible event nodes
+	for (const range of ranges) {
+		events.push(
+			{
+				date: range.start,
+				displayDate: formatISODate(range.start),
+				originalDate: formatISODate(range.start),
+				content: T.rangeStartEvent(range.title),
+			},
+			{
+				date: range.end,
+				displayDate: formatISODate(range.end),
+				originalDate: formatISODate(range.end),
+				content: T.rangeEndEvent(range.title),
+			}
+		);
+	}
+
 	// Sort events
 	events.sort((a, b) => {
 		const direction = plugin.settings.sortDirection === 'asc' ? 1 : -1;
@@ -276,7 +295,7 @@ export async function processTimelineBlock(
 
 	let rangesEl: HTMLElement | null = null;
 	let hasActiveRange = false;
-	if (plugin.settings.showRangeBars && ranges.length > 0) {
+	if (ranges.length > 0) {
 		rangesEl = el.createDiv({
 			cls: 'timeline-ranges',
 			attr: {
