@@ -2,7 +2,7 @@
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **当前版本 (Current version)**: 1.5.3
+> **当前版本 (Current version)**: 1.6.0
 
 ---
 
@@ -95,7 +95,7 @@ npm run build
 - 状态自动计算：进行中显示「第 x/n 天」（开始当天为第 0 天），未开始显示「还有 x 天开始」，已结束显示「已结束 x 天」
 - 进度条颜色跟随时间轴颜色：未开始不填充，进行中按比例填充，已结束填满并降低透明度
 - 起止同一天时退化为普通时间点事件；开始晚于结束时自动交换
-- 时间段的开始日和结束日会同时作为事件节点（「标题（开始）」「标题（结束）」）渲染在时间轴上，与进度条一一对应
+- 时间段的开始日和结束日会在时间轴上渲染为主题色水平分隔线（「标题（开始）」「标题（结束）」），与进度条一一对应；开始线自动排在当日所有事件上方、结束线排在下方，可在设置中关闭
 - 自动折叠时只显示进行中的进度条
 
 ### 时间轴链接
@@ -147,6 +147,7 @@ source: [[工作安排]]
 | 悬停提示框 | 是否显示距今天数提示 | 开启 | 开关 |
 | 悬停延迟 | 提示框出现前的等待时间 | 500ms | 0–1000ms |
 | 当天事件高亮 | 当天事件特殊标记 | 开启 | 开关 |
+| 时间段端点标记 | 时间轴中显示时间段起止分隔线 | 开启 | 开关 |
 | 自动折叠 | 事件过多时自动折叠 | 开启 | 开关 |
 | 折叠阈值 | 触发折叠的事件数量 | 10 | 5–50 |
 | 折叠时显示数量 | 折叠后显示的事件数 | 5 | 1–15 |
@@ -173,6 +174,12 @@ npm run lint         # ESLint 代码检查
 ---
 
 ## 更新日志
+
+### 1.6.0 — 端点分隔线 (2026-08)
+
+- 时间段起止日期渲染为时间轴上的主题色水平分隔线：文字居中，线条向两端延伸渐隐，悬浮时提亮
+- 同日包含排序：开始分隔线自动排在当日所有事件上方，结束分隔线排在下方
+- 新增「时间段端点标记」设置开关；移除进度条显示开关（进度条改为常显）
 
 ### 1.5.x — 时间段与生态完善 (2026-07)
 
@@ -225,7 +232,7 @@ npm run lint         # ESLint 代码检查
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **Current version**: 1.5.3
+> **Current version**: 1.6.0
 
 ## Description
 
@@ -312,7 +319,7 @@ Beyond point-in-time events, use `DateA～DateB: content` for a span with explic
 - Status is computed automatically: "Day x/n" while active (day 0 on the start date), "Starts in x days" when upcoming, "Ended x days ago" when over
 - Bar color follows the timeline color: empty when upcoming, proportional fill while active, full but dimmed when ended
 - Identical start and end degrades to a normal point event; a start later than the end is swapped automatically
-- Each range's start and end dates also appear as event nodes on the timeline ("Title (Start)" / "Title (End)"), matching the progress bars one-to-one
+- Each range's start and end dates render as theme-colored horizontal divider lines on the timeline ("Title (Start)" / "Title (End)"), matching the progress bars one-to-one; the start divider ranks above all same-day events and the end divider below — can be turned off in settings
 - When collapsed, only active bars are shown
 
 ### Timeline Source
@@ -362,6 +369,7 @@ Use the command palette (`Ctrl+P`) and run the **"Notes summary / 笔记汇总"*
 | Hover tooltip | Show days-until/since tooltip | On | Toggle |
 | Hover delay | Delay before tooltip appears | 500ms | 0–1000ms |
 | Highlight today | Special highlight for today's events | On | Toggle |
+| Range start/end markers | Show range endpoints as divider lines on the timeline | On | Toggle |
 | Auto collapse | Auto-collapse when above threshold | On | Toggle |
 | Collapse threshold | Events needed to trigger collapse | 10 | 5–50 |
 | Show when collapsed | Events shown when collapsed | 5 | 1–15 |
@@ -384,6 +392,12 @@ npm run lint         # ESLint check
 - **Minimum Obsidian version**: 1.8.7 (desktop and mobile)
 
 ## Changelog
+
+### 1.6.0 — Endpoint Dividers (2026-08)
+
+- Range start/end dates render as theme-colored horizontal divider lines on the timeline: centered text, lines fading out to both sides, brightening on hover
+- Same-day inclusion ordering: the start divider ranks above all events on its day, the end divider below
+- New "Range start/end markers" setting toggle; removed the progress-bar visibility setting (bars are now always shown)
 
 ### 1.5.x — Date Ranges & Ecosystem (2026-07)
 
