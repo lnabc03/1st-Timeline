@@ -1,7 +1,7 @@
 import { Component, MarkdownRenderer, type MarkdownPostProcessorContext } from 'obsidian';
 import type TimelinePlugin from './main';
 import { SINGLE_LINE_REGEX } from './constants';
-import { formatISODate, parseDateRangeLine, parseDateTime } from './date-parser';
+import { formatISODate, parseDateRangeLine, parseDateTime, parseMultiDateLine } from './date-parser';
 import {
 	findSourceDirective,
 	loadSourceText,
@@ -39,16 +39,24 @@ function parseEvents(source: string): {
 	const ranges: TimelineRange[] = [];
 	const lines = source.split('\n');
 
-	let currentEvent: TimelineEvent | null = null;
+	// 正在累积内容的事件日期（多日期语法下同一条内容对应多个日期）
+	interface PendingDate {
+		date: Date;
+		displayDate: string;
+		originalDate: string;
+	}
+	let currentDates: PendingDate[] = [];
 	let currentContent: string[] = [];
 
 	const flushCurrentEvent = () => {
-		if (currentEvent) {
-			currentEvent.content = currentContent.join('\n').trim();
-			if (currentEvent.content) {
-				events.push(currentEvent);
+		if (currentDates.length > 0) {
+			const content = currentContent.join('\n').trim();
+			if (content) {
+				for (const pending of currentDates) {
+					events.push({ ...pending, content });
+				}
 			}
-			currentEvent = null;
+			currentDates = [];
 		}
 	};
 
@@ -56,7 +64,7 @@ function parseEvents(source: string): {
 		const trimmedLine = line.trim();
 
 		if (trimmedLine === '') {
-			if (currentEvent) {
+			if (currentDates.length > 0) {
 				currentContent.push(line);
 			}
 			continue;
@@ -81,6 +89,20 @@ function parseEvents(source: string): {
 			} else {
 				ranges.push(range);
 			}
+			continue;
+		}
+
+		// 多日期语法（「和/及/、/，」批量添加同一事件），
+		// 优先于单行语法
+		const multi = parseMultiDateLine(trimmedLine);
+		if (multi) {
+			flushCurrentEvent();
+			currentDates = multi.dates.map((d) => ({
+				date: d.date,
+				displayDate: d.display,
+				originalDate: d.display,
+			}));
+			currentContent = multi.content ? [multi.content] : [];
 			continue;
 		}
 
@@ -109,14 +131,15 @@ function parseEvents(source: string): {
 			flushCurrentEvent();
 
 			const parsed = parseDateTime(dateTimeStr)!;
-			currentEvent = {
-				date: parsed.date,
-				displayDate: parsed.display,
-				originalDate: dateTimeStr,
-				content: '',
-			};
+			currentDates = [
+				{
+					date: parsed.date,
+					displayDate: parsed.display,
+					originalDate: dateTimeStr,
+				},
+			];
 			currentContent = contentStr ? [contentStr] : [];
-		} else if (currentEvent) {
+		} else if (currentDates.length > 0) {
 			currentContent.push(line);
 		}
 	}
@@ -261,13 +284,14 @@ export async function processTimelineBlock(
 			const displayDate = formatISODate(day);
 			if (starts.length > 0 && ends.length > 0) {
 				// 合并分隔线的隐含时间为中午：排序时正午及之后的
-				// 同日事件排在其下方，早上/上午的排在上方
+				// 同日事件排在其下方，早上/上午的排在上方。
+				// 结束在上、开始在下，渲染为上下两行（空行分段）
 				const noon = new Date(day);
 				noon.setHours(12, 0, 0, 0);
 				const content = [
 					...ends.map((title) => T.rangeEndEvent(title)),
 					...starts.map((title) => T.rangeStartEvent(title)),
-				].join(T.rangeJunctionSep);
+				].join('\n\n');
 				events.push({
 					date: noon,
 					displayDate,
@@ -482,6 +506,9 @@ export async function processTimelineBlock(
 		});
 		listEl.createEl('li', {
 			text: T.syntaxMultiline,
+		});
+		listEl.createEl('li', {
+			text: T.syntaxMultiDate,
 		});
 		return;
 	}

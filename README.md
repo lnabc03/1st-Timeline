@@ -2,7 +2,7 @@
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **当前版本 (Current version)**: 1.6.1
+> **当前版本 (Current version)**: 1.7.0
 
 ---
 
@@ -78,6 +78,26 @@ npm run build
 | 英文冒号 | `:` | `2024-05-01:事件内容` |
 | 仅日期（多行） | 换行 | 日期独占一行，后续行为事件内容 |
 
+### 多日期批量添加
+
+同一事件需要记在多个日期时，可在一行内列出所有日期，渲染时每个日期各生成一个相同内容的事件：
+
+````markdown
+```timeline
+2026年9月1日和9月10日：任务A
+2026年9月1日，9月3日及9月5日：任务B
+2026-09-01, 09-03: 任务C
+2026-09-01_09:00，09-03_14:00：任务D
+2026年9月1日早上和9月3日晚上：任务E
+```
+````
+
+- 日期分隔符支持 `,`、`，`、`、`、`和`、`及`，可混用
+- 第二个及以后的日期可省略年份（与第一个日期同年），中文格式写 `9月10日`，ISO 格式写 `09-03`
+- 支持精确时间（`_HH:MM`）和中文时间词（早上/上午/中午/下午/晚上），不同日期可混用不同格式
+- 日期列表独占一行时，后续行作为这些日期共同的多行内容
+- 重复日期（含相同时间点）自动去重
+
 ### 时间段（日期范围）
 
 除了时间点事件，还可以用 `日期A～日期B：内容` 表示一段有明确起止的时间（如实习、项目周期），渲染为时间轴上方的横向进度条：
@@ -123,6 +143,14 @@ source: [[工作安排]]
 - 时间段以结束日期判断：已结束的时间段会被归档，进行中/未开始的保留
 - 过期事件追加到同文件的「已归档：」区域（纯文本保留原始格式）；区域不存在时在文件末尾自动创建
 - 重复执行时识别已有归档区并追加，今天及未来的事件保留在块内
+
+### 添加新事件
+
+执行命令面板的 **"添加新事件 / Add new event"** 命令，弹窗中输入时间和事件内容：
+
+- 顶部实时预览新增行（`时间：事件`），支持所有日期/时间格式及时间段写法
+- 「继续新增」固定当前行并清空输入，可连续添加多条；「保存并退出」将所有新增行写入时间轴末尾
+- 当前笔记没有 timeline 代码块时自动在光标处新建；有多个代码块时弹出选择框（附所在行号）
 
 ### 笔记汇总
 
@@ -175,6 +203,12 @@ npm run lint         # ESLint 代码检查
 ---
 
 ## 更新日志
+
+### 1.7.0 — 多日期与快捷添加 (2026-08)
+
+- 新增多日期语法：一行内用 `,` `，` `、` `和` `及`（可混用）列出多个日期，同一事件批量添加到各日期；第二个起可省略年份；支持精确时间和中文时间词
+- 新增「添加新事件」命令：弹窗输入时间与事件，实时预览新增行，可连续新增后一次写入；无代码块时自动新建，多代码块时选择目标时间轴
+- 相邻时间段共享一天时，合并分隔线改为上下两行（结束在上、开始在下），光点与日期标签垂直居中
 
 ### 1.6.1 — 相邻时间段端点合并 (2026-08)
 
@@ -238,7 +272,7 @@ npm run lint         # ESLint 代码检查
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **Current version**: 1.6.1
+> **Current version**: 1.7.0
 
 ## Description
 
@@ -308,6 +342,25 @@ A new year begins! (multi-line text)
 | English colon | `:` | `2024-05-01: Event content` |
 | Date only (multi-line) | Newline | Date on one line, content on following lines |
 
+### Multiple Dates
+
+When the same event belongs to several dates, list all dates on one line — each date gets its own event with identical content:
+
+````markdown
+```timeline
+2026年9月1日和9月10日：Task A
+2026年9月1日，9月3日及9月5日：Task B
+2026-09-01, 09-03: Task C
+2026-09-01_09:00, 09-03_14:00: Task D
+```
+````
+
+- Date separators: `,`, `，`, `、`, `和`, `及` — freely mixable
+- Dates after the first may omit the year (same year as the first): write `9月10日` in Chinese format or `09-03` in ISO format
+- Precise times (`_HH:MM`) and Chinese time-of-day words (早上/上午/中午/下午/晚上) are supported, and formats may be mixed within one line
+- If the date list occupies the whole line, following lines become the shared multi-line content
+- Duplicate dates (including identical times) are deduplicated
+
 ### Date Ranges
 
 Beyond point-in-time events, use `DateA～DateB: content` for a span with explicit start and end (e.g. an internship or project phase), rendered as horizontal progress bars above the timeline:
@@ -354,6 +407,14 @@ Run the **"Archive past events / 归档过期事件"** command from the command 
 - Archived events are appended to an "Archived:" section in the same file (kept as plain text in original format); the section is created at the end of the file if absent
 - Running the command again appends to the existing section; today's and future events stay in the block
 
+### Add New Event
+
+Run the **"Add new event / 添加新事件"** command from the command palette and fill in the date/time and the event content:
+
+- The composed line (`time：event`) previews live at the top; all date/time formats and the date-range syntax are accepted
+- "Add another" fixes the current line and clears the inputs for consecutive additions; "Save & exit" writes all pending lines to the end of the timeline block
+- If the note has no timeline block, one is created at the cursor; if several blocks exist, a picker asks which timeline to use (with line numbers)
+
 ### Notes Summary
 
 Use the command palette (`Ctrl+P`) and run the **"Notes summary / 笔记汇总"** command:
@@ -399,6 +460,12 @@ npm run lint         # ESLint check
 - **Minimum Obsidian version**: 1.8.7 (desktop and mobile)
 
 ## Changelog
+
+### 1.7.0 — Multiple Dates & Quick Add (2026-08)
+
+- New multi-date syntax: list several dates on one line with `,` `，` `、` `和` `及` (freely mixable) to add the same event to every date; later dates may omit the year; precise times and Chinese time-of-day words supported
+- New "Add new event" command: a modal with time and content inputs, live preview of the composed line, consecutive additions written in one save; creates a block when absent, asks which timeline when several exist
+- The merged divider for adjacent ranges now renders as two stacked rows (End on top, Start below) with the dot and date label vertically centered
 
 ### 1.6.1 — Merged Dividers for Adjacent Ranges (2026-08)
 

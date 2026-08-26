@@ -48,6 +48,21 @@ export interface Locale {
 	// Command
 	commandNotesSummary: string;
 	commandArchivePastEvents: string;
+	commandAddEvent: string;
+
+	// Add event modal
+	addEventModalTitle: string;
+	addEventTimePlaceholder: string;
+	addEventContentPlaceholder: string;
+	addEventContinue: string;
+	addEventSave: string;
+	addEventPickTitle: string;
+	addEventPickPrompt: string;
+	addEventBlockOption: (index: number, line: number) => string;
+	noticeInvalidEventTime: string;
+	noticeEmptyEventContent: string;
+	noticeNothingToSave: string;
+	noticeEventAdded: (count: number) => string;
 
 	// Timeline error messages
 	timelineParseError: string;
@@ -55,6 +70,7 @@ export interface Locale {
 	syntaxColon: string;
 	syntaxTwoSpaces: string;
 	syntaxMultiline: string;
+	syntaxMultiDate: string;
 
 	// Timeline source directive errors
 	sourceFileNotFound: (link: string) => string;
@@ -74,8 +90,6 @@ export interface Locale {
 	rangeEndedAgo: (days: number) => string;
 	rangeStartEvent: (title: string) => string;
 	rangeEndEvent: (title: string) => string;
-	/** 合并分隔线中“结束”与“开始”之间的分隔符 */
-	rangeJunctionSep: string;
 
 	// Collapse button
 	collapseShowAll: (count: number) => string;
@@ -146,12 +160,29 @@ const EN: Locale = {
 
 	commandNotesSummary: 'Notes summary',
 	commandArchivePastEvents: 'Archive past events',
+	commandAddEvent: 'Add new event',
+
+	addEventModalTitle: 'Add new event',
+	addEventTimePlaceholder: 'Date/time (e.g. 2026-09-01 or 2026年9月1日早上)',
+	addEventContentPlaceholder: 'Event content',
+	addEventContinue: 'Add another',
+	addEventSave: 'Save & exit',
+	addEventPickTitle: 'Choose a timeline',
+	addEventPickPrompt:
+		'Multiple timeline code blocks found. Choose which one to add to:',
+	addEventBlockOption: (index: number, line: number) =>
+		`Timeline ${index} (line ${line})`,
+	noticeInvalidEventTime: 'Invalid date/time format',
+	noticeEmptyEventContent: 'Event content cannot be empty',
+	noticeNothingToSave: 'Nothing to save',
+	noticeEventAdded: (count: number) => `Added ${count} event(s)`,
 
 	timelineParseError: 'Timeline parse error',
 	noValidEvents: 'No valid events could be parsed. Check the syntax:',
 	syntaxColon: 'Date: content (colon separator)',
 	syntaxTwoSpaces: 'Date  content (two spaces separator)',
 	syntaxMultiline: 'Date (followed by newline and multi-line content)',
+	syntaxMultiDate: 'Date1, Date2: content (same event on multiple dates)',
 
 	sourceFileNotFound: (link: string) => `File not found: ${link}`,
 	sourceNoTimelineBlock: (file: string) =>
@@ -169,7 +200,6 @@ const EN: Locale = {
 	rangeEndedAgo: (days: number) => `Ended ${days} days ago`,
 	rangeStartEvent: (title: string) => `${title} (Start)`,
 	rangeEndEvent: (title: string) => `${title} (End)`,
-	rangeJunctionSep: ', ',
 
 	collapseShowAll: (count: number) => `Show all (+${count})`,
 	collapseCollapse: 'Collapse',
@@ -240,12 +270,28 @@ const ZH: Locale = {
 
 	commandNotesSummary: '笔记汇总',
 	commandArchivePastEvents: '归档过期事件',
+	commandAddEvent: '添加新事件',
+
+	addEventModalTitle: '添加新事件',
+	addEventTimePlaceholder: '时间（如 2026-09-01、2026年9月1日早上）',
+	addEventContentPlaceholder: '事件内容',
+	addEventContinue: '继续新增',
+	addEventSave: '保存并退出',
+	addEventPickTitle: '选择时间轴',
+	addEventPickPrompt: '检测到多个 timeline 代码块，请选择要写入的时间轴：',
+	addEventBlockOption: (index: number, line: number) =>
+		`时间轴 ${index}（第 ${line} 行）`,
+	noticeInvalidEventTime: '时间格式无效',
+	noticeEmptyEventContent: '事件内容不能为空',
+	noticeNothingToSave: '没有需要保存的内容',
+	noticeEventAdded: (count: number) => `已添加 ${count} 条事件`,
 
 	timelineParseError: '时间轴解析错误',
 	noValidEvents: '无法解析任何有效事件。请检查语法：',
 	syntaxColon: '日期：内容（冒号分隔）',
 	syntaxTwoSpaces: '日期  内容（两个空格分隔）',
 	syntaxMultiline: '日期（独占一行，后续行为事件内容）',
+	syntaxMultiDate: '日期1、日期2：内容（同一事件批量添加到多个日期）',
 
 	sourceFileNotFound: (link: string) => `找不到文件：${link}`,
 	sourceNoTimelineBlock: (file: string) =>
@@ -263,7 +309,6 @@ const ZH: Locale = {
 	rangeEndedAgo: (days: number) => `已结束 ${days} 天`,
 	rangeStartEvent: (title: string) => `${title}（开始）`,
 	rangeEndEvent: (title: string) => `${title}（结束）`,
-	rangeJunctionSep: '、',
 
 	collapseShowAll: (count: number) => `显示全部 (+${count})`,
 	collapseCollapse: '折叠',

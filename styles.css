@@ -558,6 +558,74 @@
   opacity: 0.95;
 }
 
+/* --- 合并分隔线（相邻时间段共享一天）：上下两行，
+   每行自成“线 + 居中文字 + 线”，整体垂直水平居中 --- */
+.timeline-range-junction .timeline-content {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 4px;
+}
+
+/* 行级别的线条移到每个 <p> 上，容器自身的伪元素停用 */
+.timeline-range-junction .timeline-content::before,
+.timeline-range-junction .timeline-content::after {
+  content: none;
+}
+
+.timeline-range-junction .timeline-content p {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.timeline-range-junction .timeline-content p::before,
+.timeline-range-junction .timeline-content p::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  opacity: 0.55;
+  transition: opacity 0.25s ease;
+}
+
+.timeline-range-junction .timeline-content p::before {
+  background: linear-gradient(to right, transparent, var(--timeline-color));
+}
+
+.timeline-range-junction .timeline-content p::after {
+  background: linear-gradient(to left, transparent, var(--timeline-color));
+}
+
+.timeline-range-junction .timeline-content:hover p::before,
+.timeline-range-junction .timeline-content:hover p::after {
+  opacity: 0.95;
+}
+
+/* 两行高度下，光点垂直居中于两行之间 —— 即“当天分割点” */
+.timeline-range-junction .timeline-dot {
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%);
+}
+
+.timeline-item.timeline-range-junction:hover .timeline-dot {
+  transform: translateX(-50%) translateY(-50%) scale(1.3);
+}
+
+/* 桌面端日期标签同样垂直居中（移动端日期在内容上方，不适用） */
+@media (min-width: 601px) {
+  .timeline-range-junction .timeline-date {
+    top: 50%;
+    transform: translateY(-50%);
+  }
+}
+
+/* 移动端条目有 28px 顶部内边距（日期行），向下补偿使光点仍居中于内容 */
+@media (max-width: 600px) {
+  .timeline-range-junction .timeline-dot {
+    top: calc(50% + 14px);
+  }
+}
+
 /* --- 错误提示样式 --- */
 .timeline-error {
   padding: 12px 16px;
@@ -662,4 +730,44 @@
 
 .timeline-modal-confirm {
   margin-left: 0.5rem;
+}
+
+/* --- 添加新事件弹窗 --- */
+.timeline-add-event-modal {
+  max-width: 480px;
+}
+
+.timeline-add-event-preview {
+  min-height: 1.5em;
+  margin-bottom: 0.75rem;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: var(--background-secondary);
+  font-family: var(--font-monospace);
+  font-size: 0.85em;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.timeline-add-event-line-current {
+  color: var(--text-muted);
+}
+
+.timeline-add-event-content {
+  width: 100%;
+  min-height: 5em;
+  margin-top: 0.5rem;
+  resize: vertical;
+}
+
+/* --- 时间轴选择弹窗（多代码块时） --- */
+.timeline-block-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.timeline-block-picker-option {
+  text-align: left;
+  padding: 8px 12px;
 }

@@ -7,6 +7,7 @@ import {
 import { processTimelineBlock } from './timeline-processor';
 import { DateRangeModal } from './notes-summary';
 import { archivePastEvents } from './archive-events';
+import { AddEventModal } from './add-event';
 import { t } from './i18n';
 
 export default class TimelinePlugin extends Plugin {
@@ -31,6 +32,14 @@ export default class TimelinePlugin extends Plugin {
 			name: t().commandArchivePastEvents,
 			callback: () => {
 				void archivePastEvents(this);
+			},
+		});
+
+		this.addCommand({
+			id: 'add-timeline-event',
+			name: t().commandAddEvent,
+			callback: () => {
+				new AddEventModal(this.app, this).open();
 			},
 		});
 
