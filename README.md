@@ -2,7 +2,7 @@
 
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
-> **当前版本 (Current version)**: 1.6.0
+> **当前版本 (Current version)**: 1.6.1
 
 ---
 
@@ -96,6 +96,7 @@ npm run build
 - 进度条颜色跟随时间轴颜色：未开始不填充，进行中按比例填充，已结束填满并降低透明度
 - 起止同一天时退化为普通时间点事件；开始晚于结束时自动交换
 - 时间段的开始日和结束日会在时间轴上渲染为主题色水平分隔线（「标题（开始）」「标题（结束）」），与进度条一一对应；开始线自动排在当日所有事件上方、结束线排在下方，可在设置中关闭
+- 相邻时间段共享同一天（前段结束日 = 后段开始日）时，两条分隔线合并为一条「A（结束）、B（开始）」；合并线隐含时间为中午，当日正午及之后的事件排在其下方、早上/上午的排在上方
 - 自动折叠时只显示进行中的进度条
 
 ### 时间轴链接
@@ -175,6 +176,11 @@ npm run lint         # ESLint 代码检查
 
 ## 更新日志
 
+### 1.6.1 — 相邻时间段端点合并 (2026-08)
+
+- 修复边缘情况：前一段的结束日与后一段的开始日相同时，时间轴上不再出现两条紧邻的分隔线，而是合并为一条「A（结束）、B（开始）」
+- 合并分隔线的隐含时间为中午：当天正午及之后的事件排在其下方，早上/上午的事件排在其上方
+
 ### 1.6.0 — 端点分隔线 (2026-08)
 
 - 时间段起止日期渲染为时间轴上的主题色水平分隔线：文字居中，线条向两端延伸渐隐，悬浮时提亮
@@ -232,7 +238,7 @@ npm run lint         # ESLint 代码检查
 
 > A simple, elegant, Chinese-friendly timeline rendering plugin for Obsidian.
 > 一个简单、优雅、中文友好的 Obsidian 时间轴渲染插件。
-> **Current version**: 1.6.0
+> **Current version**: 1.6.1
 
 ## Description
 
@@ -320,6 +326,7 @@ Beyond point-in-time events, use `DateA～DateB: content` for a span with explic
 - Bar color follows the timeline color: empty when upcoming, proportional fill while active, full but dimmed when ended
 - Identical start and end degrades to a normal point event; a start later than the end is swapped automatically
 - Each range's start and end dates render as theme-colored horizontal divider lines on the timeline ("Title (Start)" / "Title (End)"), matching the progress bars one-to-one; the start divider ranks above all same-day events and the end divider below — can be turned off in settings
+- When adjacent ranges share one day (one ends the day the next begins), the two dividers merge into a single "A (End), B (Start)" line; it sits at an implicit noon, so same-day events at or after noon rank below it and morning events above
 - When collapsed, only active bars are shown
 
 ### Timeline Source
@@ -392,6 +399,11 @@ npm run lint         # ESLint check
 - **Minimum Obsidian version**: 1.8.7 (desktop and mobile)
 
 ## Changelog
+
+### 1.6.1 — Merged Dividers for Adjacent Ranges (2026-08)
+
+- Fixed an edge case: when one range ends on the same day the next begins, the timeline no longer shows two adjacent divider lines — they merge into a single "A (End), B (Start)" divider
+- The merged divider sits at an implicit noon: same-day events at or after noon rank below it, morning events above
 
 ### 1.6.0 — Endpoint Dividers (2026-08)
 

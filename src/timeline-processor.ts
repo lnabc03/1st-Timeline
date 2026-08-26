@@ -14,8 +14,9 @@ interface TimelineEvent {
 	displayDate: string;
 	originalDate: string;
 	content: string;
-	/** 时间段端点标记：由 range 的起止日期自动生成的节点 */
-	kind?: 'range-start' | 'range-end';
+	/** 时间段端点标记：由 range 的起止日期自动生成的节点；
+	 *  range-junction 为相邻时间段共享同一天时的合并分隔线 */
+	kind?: 'range-start' | 'range-end' | 'range-junction';
 }
 
 interface TimelineRange {
@@ -234,37 +235,84 @@ export async function processTimelineBlock(
 	// progress bars above correspond to visible event nodes
 	// (可由“时间段端点标记”设置关闭)
 	if (plugin.settings.showRangeEndpoints) {
+		// 按天归集端点：同一天既有结束又有开始时（如前一段的
+		// 结束日 = 后一段的开始日），合并为一条分隔线
+		// “A（结束）、B（开始）”，而不是上下两条。
+		interface DayEndpoints {
+			day: Date;
+			starts: string[];
+			ends: string[];
+		}
+		const endpointsByDay = new Map<number, DayEndpoints>();
+		const entryFor = (d: Date): DayEndpoints => {
+			const key = new Date(d).setHours(0, 0, 0, 0);
+			let entry = endpointsByDay.get(key);
+			if (!entry) {
+				entry = { day: new Date(key), starts: [], ends: [] };
+				endpointsByDay.set(key, entry);
+			}
+			return entry;
+		};
 		for (const range of ranges) {
-			events.push(
-				{
-					date: range.start,
-					displayDate: formatISODate(range.start),
-					originalDate: formatISODate(range.start),
-					content: T.rangeStartEvent(range.title),
-					kind: 'range-start',
-				},
-				{
-					date: range.end,
-					displayDate: formatISODate(range.end),
-					originalDate: formatISODate(range.end),
-					content: T.rangeEndEvent(range.title),
-					kind: 'range-end',
+			entryFor(range.start).starts.push(range.title);
+			entryFor(range.end).ends.push(range.title);
+		}
+		for (const { day, starts, ends } of endpointsByDay.values()) {
+			const displayDate = formatISODate(day);
+			if (starts.length > 0 && ends.length > 0) {
+				// 合并分隔线的隐含时间为中午：排序时正午及之后的
+				// 同日事件排在其下方，早上/上午的排在上方
+				const noon = new Date(day);
+				noon.setHours(12, 0, 0, 0);
+				const content = [
+					...ends.map((title) => T.rangeEndEvent(title)),
+					...starts.map((title) => T.rangeStartEvent(title)),
+				].join(T.rangeJunctionSep);
+				events.push({
+					date: noon,
+					displayDate,
+					originalDate: displayDate,
+					content,
+					kind: 'range-junction',
+				});
+			} else {
+				for (const title of starts) {
+					events.push({
+						date: new Date(day),
+						displayDate,
+						originalDate: displayDate,
+						content: T.rangeStartEvent(title),
+						kind: 'range-start',
+					});
 				}
-			);
+				for (const title of ends) {
+					events.push({
+						date: new Date(day),
+						displayDate,
+						originalDate: displayDate,
+						content: T.rangeEndEvent(title),
+						kind: 'range-end',
+					});
+				}
+			}
 		}
 	}
 
 	// Sort events.
 	// 同日排序规则：端点事件要“包含”所有同日事件 ——
 	// 开始分隔线排在当日所有事件之前，结束分隔线排在之后；
-	// 普通事件之间仍按具体时间排序。降序时整体镜像，
-	// 保证自上而下阅读时时间段始终包住当日事件。
+	// 合并分隔线（range-junction）隐含时间为中午，按时间戳
+	// 落在上午事件之后、正午及之后事件之前；普通事件之间仍按
+	// 具体时间排序。降序时整体镜像，保证自上而下阅读时
+	// 时间段始终包住当日事件。
 	const dayTime = (d: Date): number => {
 		const t = new Date(d);
 		t.setHours(0, 0, 0, 0);
 		return t.getTime();
 	};
-	const kindOrder = (kind?: 'range-start' | 'range-end'): number =>
+	const kindOrder = (
+		kind?: 'range-start' | 'range-end' | 'range-junction'
+	): number =>
 		kind === 'range-start' ? -1 : kind === 'range-end' ? 1 : 0;
 	events.sort((a, b) => {
 		const direction = plugin.settings.sortDirection === 'asc' ? 1 : -1;
@@ -272,7 +320,15 @@ export async function processTimelineBlock(
 		if (dayDiff !== 0) return direction * dayDiff;
 		const kindDiff = kindOrder(a.kind) - kindOrder(b.kind);
 		if (kindDiff !== 0) return direction * kindDiff;
-		return direction * (a.date.getTime() - b.date.getTime());
+		const timeDiff = a.date.getTime() - b.date.getTime();
+		if (timeDiff !== 0) return direction * timeDiff;
+		// 同一时刻：合并分隔线排在普通事件之前
+		// （正午的事件属于分隔线下方）
+		return (
+			direction *
+			((a.kind === 'range-junction' ? 0 : 1) -
+				(b.kind === 'range-junction' ? 0 : 1))
+		);
 	});
 
 	// Ranges always sort ascending by start date
@@ -444,7 +500,7 @@ export async function processTimelineBlock(
 			cls: 'timeline-item',
 		});
 		if (event.kind) {
-			// 时间段端点：timeline-range-start / timeline-range-end
+			// 时间段端点：timeline-range-start / -end / -junction
 			timelineItem.addClass(`timeline-${event.kind}`);
 		}
 		if (isCollapsed && !collapsedIndices.has(eventIndex)) {

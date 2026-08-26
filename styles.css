@@ -482,7 +482,8 @@
 
 /* --- 端点本体：透明背景 flex 行 —— 线 + 居中文字 + 线 --- */
 .timeline-range-start .timeline-content,
-.timeline-range-end .timeline-content {
+.timeline-range-end .timeline-content,
+.timeline-range-junction .timeline-content {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -502,8 +503,10 @@
 /* 左右两段分隔线：覆盖卡片小箭头，由文字向两端延伸并渐隐 */
 .timeline-range-start .timeline-content::before,
 .timeline-range-end .timeline-content::before,
+.timeline-range-junction .timeline-content::before,
 .timeline-range-start .timeline-content::after,
-.timeline-range-end .timeline-content::after {
+.timeline-range-end .timeline-content::after,
+.timeline-range-junction .timeline-content::after {
   content: '';
   position: static;
   flex: 1;
@@ -515,18 +518,21 @@
 }
 
 .timeline-range-start .timeline-content::before,
-.timeline-range-end .timeline-content::before {
+.timeline-range-end .timeline-content::before,
+.timeline-range-junction .timeline-content::before {
   background: linear-gradient(to right, transparent, var(--timeline-color));
 }
 
 .timeline-range-start .timeline-content::after,
-.timeline-range-end .timeline-content::after {
+.timeline-range-end .timeline-content::after,
+.timeline-range-junction .timeline-content::after {
   background: linear-gradient(to left, transparent, var(--timeline-color));
 }
 
 /* MarkdownRenderer 会包一层 <p>，去掉边距并强制单行省略 */
 .timeline-range-start .timeline-content p,
-.timeline-range-end .timeline-content p {
+.timeline-range-end .timeline-content p,
+.timeline-range-junction .timeline-content p {
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -535,7 +541,8 @@
 
 /* 悬停：线条提亮、文字着主题色；不上浮、不加阴影，保持分隔线的平直观感 */
 .timeline-range-start .timeline-content:hover,
-.timeline-range-end .timeline-content:hover {
+.timeline-range-end .timeline-content:hover,
+.timeline-range-junction .timeline-content:hover {
   transform: none;
   box-shadow: none;
   border-color: transparent;
@@ -544,8 +551,10 @@
 
 .timeline-range-start .timeline-content:hover::before,
 .timeline-range-end .timeline-content:hover::before,
+.timeline-range-junction .timeline-content:hover::before,
 .timeline-range-start .timeline-content:hover::after,
-.timeline-range-end .timeline-content:hover::after {
+.timeline-range-end .timeline-content:hover::after,
+.timeline-range-junction .timeline-content:hover::after {
   opacity: 0.95;
 }
 

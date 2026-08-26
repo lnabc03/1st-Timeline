@@ -74,6 +74,8 @@ export interface Locale {
 	rangeEndedAgo: (days: number) => string;
 	rangeStartEvent: (title: string) => string;
 	rangeEndEvent: (title: string) => string;
+	/** 合并分隔线中“结束”与“开始”之间的分隔符 */
+	rangeJunctionSep: string;
 
 	// Collapse button
 	collapseShowAll: (count: number) => string;
@@ -167,6 +169,7 @@ const EN: Locale = {
 	rangeEndedAgo: (days: number) => `Ended ${days} days ago`,
 	rangeStartEvent: (title: string) => `${title} (Start)`,
 	rangeEndEvent: (title: string) => `${title} (End)`,
+	rangeJunctionSep: ', ',
 
 	collapseShowAll: (count: number) => `Show all (+${count})`,
 	collapseCollapse: 'Collapse',
@@ -260,6 +263,7 @@ const ZH: Locale = {
 	rangeEndedAgo: (days: number) => `已结束 ${days} 天`,
 	rangeStartEvent: (title: string) => `${title}（开始）`,
 	rangeEndEvent: (title: string) => `${title}（结束）`,
+	rangeJunctionSep: '、',
 
 	collapseShowAll: (count: number) => `显示全部 (+${count})`,
 	collapseCollapse: '折叠',
