@@ -1,4 +1,4 @@
-import { type App, Notice, PluginSettingTab, Setting, type SettingDefinitionItem, type SliderComponent, TextComponent } from 'obsidian';
+import { type App, Notice, PluginSettingTab, Setting, type SettingControl, type SettingDefinitionItem, type SliderComponent, TextComponent } from 'obsidian';
 import type TimelinePlugin from './main';
 import { COLOR_PRESETS } from './constants';
 import { t } from './i18n';
@@ -35,6 +35,23 @@ export const DEFAULT_SETTINGS: TimelinePluginSettings = {
 	collapseShowCount: 5,
 };
 
+type ToggleKey = 'showTooltip' | 'highlightToday' | 'showRangeEndpoints' | 'autoCollapse';
+type SliderKey = 'tooltipDelay' | 'dotSize' | 'lineWidth' | 'itemSpacing' | 'collapseThreshold' | 'collapseShowCount';
+
+/**
+ * 一行设置项的描述：name/desc 用于渲染与搜索；
+ * control 存在时新设置界面（1.13+）使用标准控件渲染，
+ * 否则用 build 作为 render 项命令式渲染（自定义控件，
+ * 如预设色按钮、恢复默认按钮）；旧版 Obsidian 的 display()
+ * 一律走 build。
+ */
+interface RowDef {
+	name: string;
+	desc: string;
+	control?: SettingControl;
+	build: (setting: Setting) => void;
+}
+
 export class TimelineSettingTab extends PluginSettingTab {
 	plugin: TimelinePlugin;
 
@@ -43,36 +60,28 @@ export class TimelineSettingTab extends PluginSettingTab {
 		this.plugin = plugin;
 	}
 
-	display(): void {
-		const { containerEl } = this;
-		containerEl.empty();
+	/* ---- 行构建器：display() 与 getSettingDefinitions() 的 render 项共用 ---- */
+
+	private buildSortDirection(setting: Setting): void {
 		const T = t();
+		setting.addDropdown((dropdown) =>
+			dropdown
+				.addOption('asc', T.sortDirectionAscLabel)
+				.addOption('desc', T.sortDirectionDescLabel)
+				.setValue(this.plugin.settings.sortDirection)
+				.onChange(async (value: string) => {
+					this.plugin.settings.sortDirection = value as 'asc' | 'desc';
+					await this.plugin.saveSettings();
+				})
+		);
+	}
 
-		new Setting(containerEl)
-			.setName(T.headingFirstTimeline)
-			.setHeading();
-
-		new Setting(containerEl)
-			.setName(T.sortDirection)
-			.setDesc(T.sortDirectionDesc)
-			.addDropdown((dropdown) =>
-				dropdown
-					.addOption('asc', T.sortDirectionAscLabel)
-					.addOption('desc', T.sortDirectionDescLabel)
-					.setValue(this.plugin.settings.sortDirection)
-					.onChange(async (value: string) => {
-						this.plugin.settings.sortDirection = value as 'asc' | 'desc';
-						await this.plugin.saveSettings();
-					})
-			);
-
-		let createdDateFieldComponent: TextComponent;
-
-		new Setting(containerEl)
-			.setName(T.datePropertyForNotes)
-			.setDesc(T.datePropertyDesc)
+	private buildCreatedDateField(setting: Setting): void {
+		const T = t();
+		let textComponent: TextComponent;
+		setting
 			.addText((text) => {
-				createdDateFieldComponent = text;
+				textComponent = text;
 				return text
 					.setValue(this.plugin.settings.createdDateField)
 					.onChange(async (value: string) => {
@@ -84,18 +93,17 @@ export class TimelineSettingTab extends PluginSettingTab {
 				button.setButtonText(T.restoreDefault).onClick(async () => {
 					this.plugin.settings.createdDateField = 'created';
 					await this.plugin.saveSettings();
-					createdDateFieldComponent.setValue('created');
+					textComponent.setValue('created');
 					new Notice(T.noticeDefaultRestored);
 				})
 			);
+	}
 
-		// Color settings with preset buttons
-		const colorSetting = new Setting(containerEl)
-			.setName(T.timelineColor)
-			.setDesc(T.timelineColorDesc);
+	private buildTimelineColor(setting: Setting): void {
+		const T = t();
 
-		// Row 1: color preview circle + bare text input
-		const colorRow = colorSetting.controlEl.createDiv({
+		// 第 1 行：颜色预览圆点 + 十六进制输入框
+		const colorRow = setting.controlEl.createDiv({
 			cls: 'timeline-color-setting-container',
 		});
 
@@ -119,8 +127,8 @@ export class TimelineSettingTab extends PluginSettingTab {
 			})();
 		});
 
-		// Row 2: preset color buttons
-		const presetsRow = colorSetting.controlEl.createDiv({
+		// 第 2 行：预设色按钮
+		const presetsRow = setting.controlEl.createDiv({
 			cls: 'timeline-color-presets-row',
 		});
 
@@ -142,218 +150,53 @@ export class TimelineSettingTab extends PluginSettingTab {
 				new Notice(T.noticeSetToTheme(preset.name));
 			});
 		}
-
-			// Hover tooltip
-			new Setting(containerEl)
-				.setName(T.hoverTooltip)
-				.setDesc(T.hoverTooltipDesc)
-				.addToggle((toggle) =>
-					toggle
-						.setValue(this.plugin.settings.showTooltip)
-						.onChange(async (value: boolean) => {
-							this.plugin.settings.showTooltip = value;
-							await this.plugin.saveSettings();
-						})
-				);
-
-			// Hover delay
-			let tooltipDelaySlider: SliderComponent;
-
-			new Setting(containerEl)
-				.setName(T.hoverDelay)
-				.setDesc(T.hoverDelayDesc)
-				.addSlider((slider) => {
-					tooltipDelaySlider = slider;
-					return slider
-						.setLimits(0, 1000, 100)
-						.setValue(this.plugin.settings.tooltipDelay)
-						.onChange(async (value: number) => {
-							this.plugin.settings.tooltipDelay = value;
-							await this.plugin.saveSettings();
-						});
-				})
-				.addButton((button) =>
-					button.setButtonText(T.restoreDefault).onClick(async () => {
-						this.plugin.settings.tooltipDelay = 500;
-						await this.plugin.saveSettings();
-						tooltipDelaySlider.setValue(500);
-						new Notice(T.noticeHoverDelayRestored);
-					})
-				);
-
-			// Highlight today
-			new Setting(containerEl)
-				.setName(T.highlightToday)
-				.setDesc(T.highlightTodayDesc)
-				.addToggle((toggle) =>
-					toggle
-						.setValue(this.plugin.settings.highlightToday)
-						.onChange(async (value: boolean) => {
-							this.plugin.settings.highlightToday = value;
-							await this.plugin.saveSettings();
-						})
-				);
-
-			// Range start/end markers
-			new Setting(containerEl)
-				.setName(T.showRangeEndpoints)
-				.setDesc(T.showRangeEndpointsDesc)
-				.addToggle((toggle) =>
-					toggle
-						.setValue(this.plugin.settings.showRangeEndpoints)
-						.onChange(async (value: boolean) => {
-							this.plugin.settings.showRangeEndpoints = value;
-							await this.plugin.saveSettings();
-						})
-				);
-
-			// Dot size
-			let dotSizeSlider: SliderComponent;
-
-			new Setting(containerEl)
-				.setName(T.dotSize)
-				.setDesc(T.dotSizeDesc)
-				.addSlider((slider) => {
-					dotSizeSlider = slider;
-					return slider
-						.setLimits(6, 20, 2)
-						.setValue(this.plugin.settings.dotSize)
-						.onChange(async (value: number) => {
-							this.plugin.settings.dotSize = value;
-							await this.plugin.saveSettings();
-						});
-				})
-				.addButton((button) =>
-					button.setButtonText(T.restoreDefault).onClick(async () => {
-						this.plugin.settings.dotSize = 12;
-						await this.plugin.saveSettings();
-						dotSizeSlider.setValue(12);
-						new Notice(T.noticeDotSizeRestored);
-					})
-				);
-
-			// Line width
-			let lineWidthSlider: SliderComponent;
-
-			new Setting(containerEl)
-				.setName(T.lineWidth)
-				.setDesc(T.lineWidthDesc)
-				.addSlider((slider) => {
-					lineWidthSlider = slider;
-					return slider
-						.setLimits(1, 5, 1)
-						.setValue(this.plugin.settings.lineWidth)
-						.onChange(async (value: number) => {
-							this.plugin.settings.lineWidth = value;
-							await this.plugin.saveSettings();
-						});
-				})
-				.addButton((button) =>
-					button.setButtonText(T.restoreDefault).onClick(async () => {
-						this.plugin.settings.lineWidth = 2;
-						await this.plugin.saveSettings();
-						lineWidthSlider.setValue(2);
-						new Notice(T.noticeLineWidthRestored);
-					})
-				);
-
-			// Event spacing
-			let itemSpacingSlider: SliderComponent;
-
-			new Setting(containerEl)
-				.setName(T.eventSpacing)
-				.setDesc(T.eventSpacingDesc)
-				.addSlider((slider) => {
-					itemSpacingSlider = slider;
-					return slider
-						.setLimits(10, 40, 5)
-						.setValue(this.plugin.settings.itemSpacing)
-						.onChange(async (value: number) => {
-							this.plugin.settings.itemSpacing = value;
-							await this.plugin.saveSettings();
-						});
-				})
-				.addButton((button) =>
-					button.setButtonText(T.restoreDefault).onClick(async () => {
-						this.plugin.settings.itemSpacing = 20;
-						await this.plugin.saveSettings();
-						itemSpacingSlider.setValue(20);
-						new Notice(T.noticeEventSpacingRestored);
-					})
-				);
-
-			// Auto collapse
-			new Setting(containerEl)
-				.setName(T.autoCollapse)
-				.setDesc(T.autoCollapseDesc)
-				.addToggle((toggle) =>
-					toggle
-						.setValue(this.plugin.settings.autoCollapse)
-						.onChange(async (value: boolean) => {
-							this.plugin.settings.autoCollapse = value;
-							await this.plugin.saveSettings();
-						})
-				);
-
-			// Collapse threshold
-			let collapseThresholdSlider: SliderComponent;
-
-			new Setting(containerEl)
-				.setName(T.collapseThreshold)
-				.setDesc(T.collapseThresholdDesc)
-				.addSlider((slider) => {
-					collapseThresholdSlider = slider;
-					return slider
-						.setLimits(5, 50, 5)
-						.setValue(this.plugin.settings.collapseThreshold)
-						.onChange(async (value: number) => {
-							this.plugin.settings.collapseThreshold = value;
-							await this.plugin.saveSettings();
-						});
-				})
-				.addButton((button) =>
-					button.setButtonText(T.restoreDefault).onClick(async () => {
-						this.plugin.settings.collapseThreshold = 10;
-						await this.plugin.saveSettings();
-						collapseThresholdSlider.setValue(10);
-						new Notice(T.noticeCollapseThresholdRestored);
-					})
-				);
-
-			// Show count when collapsed
-			let collapseShowCountSlider: SliderComponent;
-
-			new Setting(containerEl)
-				.setName(T.showWhenCollapsed)
-				.setDesc(T.showWhenCollapsedDesc)
-				.addSlider((slider) => {
-					collapseShowCountSlider = slider;
-					return slider
-						.setLimits(1, 15, 1)
-						.setValue(this.plugin.settings.collapseShowCount)
-						.onChange(async (value: number) => {
-							this.plugin.settings.collapseShowCount = value;
-							await this.plugin.saveSettings();
-						});
-				})
-				.addButton((button) =>
-					button.setButtonText(T.restoreDefault).onClick(async () => {
-						this.plugin.settings.collapseShowCount = 5;
-						await this.plugin.saveSettings();
-						collapseShowCountSlider.setValue(5);
-						new Notice(T.noticeShowCountRestored);
-					})
-				);
 	}
 
-	/**
-	 * Declarative settings for Obsidian 1.13.0+ settings search.
-	 * display() above still renders the custom UI (color presets,
-	 * restore-default buttons); these definitions mirror the simple
-	 * controls so they appear in settings search. Values bind directly
-	 * to plugin.settings via the default get/setControlValue.
-	 */
-	getSettingDefinitions(): SettingDefinitionItem[] {
+	private buildToggle(setting: Setting, key: ToggleKey): void {
+		setting.addToggle((toggle) =>
+			toggle
+				.setValue(this.plugin.settings[key])
+				.onChange(async (value: boolean) => {
+					this.plugin.settings[key] = value;
+					await this.plugin.saveSettings();
+				})
+		);
+	}
+
+	private buildSliderWithReset(
+		setting: Setting,
+		key: SliderKey,
+		min: number,
+		max: number,
+		step: number,
+		defaultValue: number,
+		restoreNotice: string
+	): void {
+		const T = t();
+		let sliderComponent: SliderComponent;
+		setting
+			.addSlider((slider) => {
+				sliderComponent = slider;
+				return slider
+					.setLimits(min, max, step)
+					.setValue(this.plugin.settings[key])
+					.onChange(async (value: number) => {
+						this.plugin.settings[key] = value;
+						await this.plugin.saveSettings();
+					});
+			})
+			.addButton((button) =>
+				button.setButtonText(T.restoreDefault).onClick(async () => {
+					this.plugin.settings[key] = defaultValue;
+					await this.plugin.saveSettings();
+					sliderComponent.setValue(defaultValue);
+					new Notice(restoreNotice);
+				})
+			);
+	}
+
+	/** 所有设置行（单一数据源，display 与 definitions 共用） */
+	private rowDefs(): RowDef[] {
 		const T = t();
 		return [
 			{
@@ -367,103 +210,117 @@ export class TimelineSettingTab extends PluginSettingTab {
 						desc: T.sortDirectionDescLabel,
 					},
 				},
+				build: (s) => this.buildSortDirection(s),
 			},
 			{
 				name: T.datePropertyForNotes,
 				desc: T.datePropertyDesc,
-				control: { type: 'text', key: 'createdDateField' },
+				build: (s) => this.buildCreatedDateField(s),
 			},
 			{
 				name: T.timelineColor,
 				desc: T.timelineColorDesc,
-				control: { type: 'color', key: 'timelineColor' },
-			},
-			{
-				name: T.dotSize,
-				desc: T.dotSizeDesc,
-				control: {
-					type: 'slider',
-					key: 'dotSize',
-					min: 6,
-					max: 20,
-					step: 2,
-				},
-			},
-			{
-				name: T.lineWidth,
-				desc: T.lineWidthDesc,
-				control: {
-					type: 'slider',
-					key: 'lineWidth',
-					min: 1,
-					max: 5,
-					step: 1,
-				},
-			},
-			{
-				name: T.eventSpacing,
-				desc: T.eventSpacingDesc,
-				control: {
-					type: 'slider',
-					key: 'itemSpacing',
-					min: 10,
-					max: 40,
-					step: 5,
-				},
+				build: (s) => this.buildTimelineColor(s),
 			},
 			{
 				name: T.hoverTooltip,
 				desc: T.hoverTooltipDesc,
 				control: { type: 'toggle', key: 'showTooltip' },
+				build: (s) => this.buildToggle(s, 'showTooltip'),
 			},
 			{
 				name: T.hoverDelay,
 				desc: T.hoverDelayDesc,
-				control: {
-					type: 'slider',
-					key: 'tooltipDelay',
-					min: 0,
-					max: 1000,
-					step: 100,
-				},
+				build: (s) =>
+					this.buildSliderWithReset(s, 'tooltipDelay', 0, 1000, 100, 500, T.noticeHoverDelayRestored),
 			},
 			{
 				name: T.highlightToday,
 				desc: T.highlightTodayDesc,
 				control: { type: 'toggle', key: 'highlightToday' },
+				build: (s) => this.buildToggle(s, 'highlightToday'),
 			},
 			{
 				name: T.showRangeEndpoints,
 				desc: T.showRangeEndpointsDesc,
 				control: { type: 'toggle', key: 'showRangeEndpoints' },
+				build: (s) => this.buildToggle(s, 'showRangeEndpoints'),
+			},
+			{
+				name: T.dotSize,
+				desc: T.dotSizeDesc,
+				build: (s) =>
+					this.buildSliderWithReset(s, 'dotSize', 6, 20, 2, 12, T.noticeDotSizeRestored),
+			},
+			{
+				name: T.lineWidth,
+				desc: T.lineWidthDesc,
+				build: (s) =>
+					this.buildSliderWithReset(s, 'lineWidth', 1, 5, 1, 2, T.noticeLineWidthRestored),
+			},
+			{
+				name: T.eventSpacing,
+				desc: T.eventSpacingDesc,
+				build: (s) =>
+					this.buildSliderWithReset(s, 'itemSpacing', 10, 40, 5, 20, T.noticeEventSpacingRestored),
 			},
 			{
 				name: T.autoCollapse,
 				desc: T.autoCollapseDesc,
 				control: { type: 'toggle', key: 'autoCollapse' },
+				build: (s) => this.buildToggle(s, 'autoCollapse'),
 			},
 			{
 				name: T.collapseThreshold,
 				desc: T.collapseThresholdDesc,
-				control: {
-					type: 'slider',
-					key: 'collapseThreshold',
-					min: 5,
-					max: 50,
-					step: 5,
-				},
+				build: (s) =>
+					this.buildSliderWithReset(s, 'collapseThreshold', 5, 50, 5, 10, T.noticeCollapseThresholdRestored),
 			},
 			{
 				name: T.showWhenCollapsed,
 				desc: T.showWhenCollapsedDesc,
-				control: {
-					type: 'slider',
-					key: 'collapseShowCount',
-					min: 1,
-					max: 15,
-					step: 1,
-				},
+				build: (s) =>
+					this.buildSliderWithReset(s, 'collapseShowCount', 1, 15, 1, 5, T.noticeShowCountRestored),
 			},
 		];
+	}
+
+	/**
+	 * 旧版 Obsidian（<1.13）的设置页：逐行构建自定义 UI。
+	 * 新版设置界面改用 getSettingDefinitions() 渲染，此方法不再被调用。
+	 */
+	display(): void {
+		const { containerEl } = this;
+		containerEl.empty();
+		const T = t();
+
+		new Setting(containerEl)
+			.setName(T.headingFirstTimeline)
+			.setHeading();
+
+		for (const row of this.rowDefs()) {
+			row.build(new Setting(containerEl).setName(row.name).setDesc(row.desc));
+		}
+	}
+
+	/**
+	 * Obsidian 1.13+ 的设置界面由此渲染（含设置搜索）。
+	 * 标准控件（dropdown/toggle）用 control 声明，由框架绑定
+	 * plugin.settings；含自定义控件的行（预设色、恢复默认按钮）
+	 * 用 render 项复用 display() 的同一套构建器。
+	 */
+	getSettingDefinitions(): SettingDefinitionItem[] {
+		return this.rowDefs().map((row): SettingDefinitionItem => {
+			if (row.control) {
+				return { name: row.name, desc: row.desc, control: row.control };
+			}
+			return {
+				name: row.name,
+				desc: row.desc,
+				render: (setting: Setting) => {
+					row.build(setting);
+				},
+			};
+		});
 	}
 }
