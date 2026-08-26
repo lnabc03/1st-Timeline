@@ -12,6 +12,8 @@
 
 > 1st Timeline renders beautiful timeline views from simple text code blocks. It supports multiple date formats with first-class Chinese date support, intelligent parsing, and elegant visual presentation.
 
+![](https://picgo-rainote.oss-cn-guangzhou.aliyuncs.com/obsidian/20260826213635887.png)
+
 ---
 
 ## 安装
@@ -168,7 +170,7 @@ source: [[工作安排]]
 |--------|------|--------|------|
 | 排序方向 | 事件排列顺序 | 升序 | 升序 / 降序 |
 | 笔记日期属性 | frontmatter 字段名 | `created` | 任意字段名 |
-| 时间轴颜色 | 时间轴线条和点的颜色 | `#5588cc` | CSS 颜色值 |
+| 时间轴颜色 | 时间轴线条和点的颜色 | `#9370DB` | CSS 颜色值 |
 | 颜色预设 | 一键切换主题色 | — | 蓝/绿/紫/红/橙 |
 | 时间点大小 | 时间轴上点的大小 | 12px | 6–20px |
 | 线条宽度 | 时间轴竖线宽度 | 2px | 1–5px |
@@ -279,6 +281,8 @@ npm run lint         # ESLint 代码检查
 1st Timeline renders beautiful timeline views from simple text code blocks. It supports multiple date formats with first-class Chinese date support, intelligent parsing, and elegant visual presentation — helping you create timelines, project progress views, or schedule records effortlessly.
 
 > 1st Timeline 是一个 Obsidian 插件，可将简单的文本代码块渲染为精美的时间轴视图。
+
+![](https://picgo-rainote.oss-cn-guangzhou.aliyuncs.com/obsidian/20260826213635887.png)
 
 ## Installation
 
@@ -429,7 +433,7 @@ Use the command palette (`Ctrl+P`) and run the **"Notes summary / 笔记汇总"*
 |---------|-------------|---------|-------|
 | Sort direction | Event sort order | Ascending | Ascending / Descending |
 | Date property | Frontmatter field name | `created` | Any field name |
-| Timeline color | Color of line and dots | `#5588cc` | CSS color value |
+| Timeline color | Color of line and dots | `#9370DB` | CSS color value |
 | Color presets | One-click theme switching | — | Blue / Green / Purple / Red / Orange |
 | Dot size | Size of timeline dots | 12px | 6–20px |
 | Line width | Width of the timeline line | 2px | 1–5px |

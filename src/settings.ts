@@ -21,7 +21,7 @@ export interface TimelinePluginSettings {
 
 export const DEFAULT_SETTINGS: TimelinePluginSettings = {
 	sortDirection: 'asc',
-	timelineColor: '#5588cc',
+	timelineColor: '#9370DB',
 	dotSize: 12,
 	lineWidth: 2,
 	itemSpacing: 20,
